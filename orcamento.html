@@ -51,14 +51,18 @@
     .radio-group label{border:1px solid #e5d9ff;border-radius:999px;padding:6px 12px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-weight:500;color:#7a6c9f;font-size:12px;}
     .radio-group input[type=radio]{accent-color:var(--rosa);}
     .vazia{font-size:12px;color:#a08fc7;text-align:center;padding:20px 0;}
+    .pw-wrap{position:relative;margin-bottom:12px;}
+    .pw-wrap input{padding-right:80px;}
+    .pw-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;border-radius:999px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;background:#F0EDFF;color:#7a3a6b;font-family:'Poppins',sans-serif;}
+    .senha-card{background:#fff;border-radius:var(--r);padding:15px 14px 18px;box-shadow:var(--sombra);margin-top:12px;}
+    .msg-erro{font-size:12px;color:#c73232;font-weight:600;margin-top:8px;display:none;}
   </style>
 </head>
 <body>
 <div class="shell">
   <header>
     <div class="brand">
-      <img src="/icon.png" alt="Orçamento Express"
-        onerror="this.style.display='none'">
+      <img src="/icon.png" alt="Orçamento Express" onerror="this.style.display='none'">
       <div>
         <h1>Orçamento Express</h1>
         <p>Gere e envie no WhatsApp na hora</p>
@@ -163,55 +167,54 @@
         <div class="fgroup"><label class="lbl">Chave Pix</label><input type="text" id="dPix" placeholder="Ex.: 11999999999"></div>
         <div class="fgroup"><label class="lbl">Nome no Pix</label><input type="text" id="dNomePix" placeholder="Ex.: Mariana Noronha"></div>
         <button class="btn-salvar-dados" id="btnSalvarDados">💾 Salvar meus dados</button>
-<p class="msg-salvo" id="msgSalvo">✅ Dados salvos!</p>
+        <p class="msg-salvo" id="msgSalvo">✅ Dados salvos!</p>
+      </div>
 
-<!-- ALTERAR SENHA -->
-<div style="margin-top:24px;">
-  <div class="sec-title">🔒 Alterar senha</div>
-  <div class="fgroup">
-    <label class="lbl">Senha atual</label>
-    <div class="pw-wrap" style="position:relative;margin-bottom:12px;">
-      <input type="password" id="senhaAtual" placeholder="Digite a senha atual" 
-        style="width:100%;padding:11px 80px 11px 14px;border-radius:999px;border:1px solid #E8E8F3;font-family:'Poppins',sans-serif;font-size:13px;outline:none;">
-      <button type="button" onclick="toggleSenha('senhaAtual',this)" 
-        style="position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;border-radius:999px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;background:#F0EDFF;color:#7a3a6b;font-family:'Poppins',sans-serif;">Mostrar</button>
-    </div>
-  </div>
-  <div class="fgroup">
-    <label class="lbl">Nova senha</label>
-    <div class="pw-wrap" style="position:relative;margin-bottom:12px;">
-      <input type="password" id="senhaNova" placeholder="Digite a nova senha"
-        style="width:100%;padding:11px 80px 11px 14px;border-radius:999px;border:1px solid #E8E8F3;font-family:'Poppins',sans-serif;font-size:13px;outline:none;">
-      <button type="button" onclick="toggleSenha('senhaNova',this)"
-        style="position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;border-radius:999px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;background:#F0EDFF;color:#7a3a6b;font-family:'Poppins',sans-serif;">Mostrar</button>
-    </div>
-  </div>
-  <div class="fgroup">
-    <label class="lbl">Confirmar nova senha</label>
-    <div class="pw-wrap" style="position:relative;margin-bottom:12px;">
-      <input type="password" id="senhaConfirm" placeholder="Confirme a nova senha"
-        style="width:100%;padding:11px 80px 11px 14px;border-radius:999px;border:1px solid #E8E8F3;font-family:'Poppins',sans-serif;font-size:13px;outline:none;">
-      <button type="button" onclick="toggleSenha('senhaConfirm',this)"
-        style="position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;border-radius:999px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;background:#F0EDFF;color:#7a3a6b;font-family:'Poppins',sans-serif;">Mostrar</button>
-    </div>
-  </div>
-  <button class="btn-salvar-dados" id="btnAlterarSenha">🔒 Alterar senha</button>
-  <p class="msg-salvo" id="msgSenha" style="display:none;"></p>
-</div>
+      <!-- CARD ALTERAR SENHA -->
+      <div class="senha-card">
+        <div class="sec-title">🔒 Alterar senha</div>
+        <div class="fgroup">
+          <label class="lbl">Senha atual</label>
+          <div class="pw-wrap">
+            <input type="password" id="senhaAtual" placeholder="Digite a senha atual">
+            <button type="button" class="pw-toggle" onclick="toggleSenha('senhaAtual',this)">Mostrar</button>
+          </div>
+        </div>
+        <div class="fgroup">
+          <label class="lbl">Nova senha</label>
+          <div class="pw-wrap">
+            <input type="password" id="senhaNova" placeholder="Digite a nova senha">
+            <button type="button" class="pw-toggle" onclick="toggleSenha('senhaNova',this)">Mostrar</button>
+          </div>
+        </div>
+        <div class="fgroup">
+          <label class="lbl">Confirmar nova senha</label>
+          <div class="pw-wrap">
+            <input type="password" id="senhaConfirm" placeholder="Confirme a nova senha">
+            <button type="button" class="pw-toggle" onclick="toggleSenha('senhaConfirm',this)">Mostrar</button>
+          </div>
+        </div>
+        <button class="btn-salvar-dados" id="btnAlterarSenha">🔒 Alterar senha</button>
+        <p class="msg-salvo" id="msgSenhaOk" style="display:none;">✅ Senha alterada com sucesso!</p>
+        <p class="msg-erro" id="msgSenhaErro"></p>
       </div>
     </div>
   </main>
 </div>
 <script>
-  // Verifica autenticação
   if(localStorage.getItem("orc_auth")!=="1"){
     window.location.href="/";
   }
 
   const KEY_DADOS="orc_dados";
+  const KEY_SENHA="orc_senha";
   const fmt=v=>Number(v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
   const pv=v=>Number(String(v||0).replace(",","."))||0;
   let textoGerado="";
+
+  function getSenhaAtual(){
+    return localStorage.getItem(KEY_SENHA)||"orcamento123";
+  }
 
   document.getElementById("btnSair").onclick=()=>{
     localStorage.removeItem("orc_auth");
@@ -290,6 +293,54 @@
     const msg=document.getElementById("msgSalvo");
     msg.style.display="block";
     setTimeout(()=>msg.style.display="none",3000);
+  };
+
+  // TOGGLE SENHA
+  function toggleSenha(id,btn){
+    const inp=document.getElementById(id);
+    const show=inp.type==="password";
+    inp.type=show?"text":"password";
+    btn.textContent=show?"Ocultar":"Mostrar";
+  }
+
+  // ALTERAR SENHA
+  document.getElementById("btnAlterarSenha").onclick=()=>{
+    const atual=document.getElementById("senhaAtual").value.trim();
+    const nova=document.getElementById("senhaNova").value.trim();
+    const confirm=document.getElementById("senhaConfirm").value.trim();
+    const msgOk=document.getElementById("msgSenhaOk");
+    const msgErro=document.getElementById("msgSenhaErro");
+
+    msgOk.style.display="none";
+    msgErro.style.display="none";
+
+    if(!atual||!nova||!confirm){
+      msgErro.style.display="block";
+      msgErro.textContent="⚠️ Preencha todos os campos.";
+      return;
+    }
+    if(atual!==getSenhaAtual()){
+      msgErro.style.display="block";
+      msgErro.textContent="❌ Senha atual incorreta.";
+      return;
+    }
+    if(nova.length<6){
+      msgErro.style.display="block";
+      msgErro.textContent="⚠️ A nova senha precisa ter pelo menos 6 caracteres.";
+      return;
+    }
+    if(nova!==confirm){
+      msgErro.style.display="block";
+      msgErro.textContent="❌ As senhas não coincidem.";
+      return;
+    }
+
+    localStorage.setItem(KEY_SENHA,nova);
+    msgOk.style.display="block";
+    document.getElementById("senhaAtual").value="";
+    document.getElementById("senhaNova").value="";
+    document.getElementById("senhaConfirm").value="";
+    setTimeout(()=>msgOk.style.display="none",3000);
   };
 
   // GERAR ORÇAMENTO
