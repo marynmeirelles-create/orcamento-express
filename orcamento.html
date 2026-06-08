@@ -163,7 +163,41 @@
         <div class="fgroup"><label class="lbl">Chave Pix</label><input type="text" id="dPix" placeholder="Ex.: 11999999999"></div>
         <div class="fgroup"><label class="lbl">Nome no Pix</label><input type="text" id="dNomePix" placeholder="Ex.: Mariana Noronha"></div>
         <button class="btn-salvar-dados" id="btnSalvarDados">💾 Salvar meus dados</button>
-        <p class="msg-salvo" id="msgSalvo">✅ Dados salvos!</p>
+<p class="msg-salvo" id="msgSalvo">✅ Dados salvos!</p>
+
+<!-- ALTERAR SENHA -->
+<div style="margin-top:24px;">
+  <div class="sec-title">🔒 Alterar senha</div>
+  <div class="fgroup">
+    <label class="lbl">Senha atual</label>
+    <div class="pw-wrap" style="position:relative;margin-bottom:12px;">
+      <input type="password" id="senhaAtual" placeholder="Digite a senha atual" 
+        style="width:100%;padding:11px 80px 11px 14px;border-radius:999px;border:1px solid #E8E8F3;font-family:'Poppins',sans-serif;font-size:13px;outline:none;">
+      <button type="button" onclick="toggleSenha('senhaAtual',this)" 
+        style="position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;border-radius:999px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;background:#F0EDFF;color:#7a3a6b;font-family:'Poppins',sans-serif;">Mostrar</button>
+    </div>
+  </div>
+  <div class="fgroup">
+    <label class="lbl">Nova senha</label>
+    <div class="pw-wrap" style="position:relative;margin-bottom:12px;">
+      <input type="password" id="senhaNova" placeholder="Digite a nova senha"
+        style="width:100%;padding:11px 80px 11px 14px;border-radius:999px;border:1px solid #E8E8F3;font-family:'Poppins',sans-serif;font-size:13px;outline:none;">
+      <button type="button" onclick="toggleSenha('senhaNova',this)"
+        style="position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;border-radius:999px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;background:#F0EDFF;color:#7a3a6b;font-family:'Poppins',sans-serif;">Mostrar</button>
+    </div>
+  </div>
+  <div class="fgroup">
+    <label class="lbl">Confirmar nova senha</label>
+    <div class="pw-wrap" style="position:relative;margin-bottom:12px;">
+      <input type="password" id="senhaConfirm" placeholder="Confirme a nova senha"
+        style="width:100%;padding:11px 80px 11px 14px;border-radius:999px;border:1px solid #E8E8F3;font-family:'Poppins',sans-serif;font-size:13px;outline:none;">
+      <button type="button" onclick="toggleSenha('senhaConfirm',this)"
+        style="position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;border-radius:999px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;background:#F0EDFF;color:#7a3a6b;font-family:'Poppins',sans-serif;">Mostrar</button>
+    </div>
+  </div>
+  <button class="btn-salvar-dados" id="btnAlterarSenha">🔒 Alterar senha</button>
+  <p class="msg-salvo" id="msgSenha" style="display:none;"></p>
+</div>
       </div>
     </div>
   </main>
