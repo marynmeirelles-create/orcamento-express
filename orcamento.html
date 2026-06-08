@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Orçamento Express</title>
+  <meta name="theme-color" content="#FF7BAC">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Orçamento Express">
+  <link rel="apple-touch-icon" href="/icon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--rosa:#FF7BAC;--roxo:#8C7BFF;--teal:#3ECFB2;--off:#FFF5F7;--cinza:#E8E8F3;--sombra:0 8px 20px rgba(0,0,0,0.07);--r:18px;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Poppins',sans-serif;background:radial-gradient(circle at top left,#FFF5F7 0%,#FFE4F0 35%,#F9F0FF 70%,#fff 100%);min-height:100vh;display:flex;justify-content:center;}
+    .shell{width:100%;max-width:480px;min-height:100vh;background:linear-gradient(180deg,#FFF5F7 0%,#fff 40%,#FFF5F7 100%);box-shadow:0 0 40px rgba(140,123,255,0.13);display:flex;flex-direction:column;}
+    header{padding:16px 18px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .brand{display:flex;align-items:center;gap:10px;}
+    .brand img{width:44px;height:44px;border-radius:12px;object-fit:contain;}
+    .brand h1{font-size:16px;font-weight:800;color:var(--roxo);}
+    .brand p{font-size:10px;color:#7a6c9f;}
+    .btn-sair{border:none;border-radius:999px;padding:6px 14px;font-size:11px;font-weight:600;cursor:pointer;background:#F0EDFF;color:#7a3a6b;font-family:'Poppins',sans-serif;}
+    main{padding:0 16px 32px;flex:1;}
+    .tabs{display:flex;background:rgba(255,255,255,.75);border-radius:999px;padding:3px;margin-bottom:16px;box-shadow:0 4px 12px rgba(0,0,0,.04);}
+    .tab{flex:1;text-align:center;font-size:11px;font-weight:600;padding:8px 4px;border-radius:999px;cursor:pointer;color:#7a6c9f;}
+    .tab.active{background:linear-gradient(90deg,var(--rosa),var(--roxo));color:#fff;box-shadow:0 3px 10px rgba(255,123,172,.4);}
+    .panel{display:none;}.panel.active{display:block;}
+    .fcard{background:#fff;border-radius:var(--r);padding:15px 14px 18px;box-shadow:var(--sombra);margin-bottom:12px;}
+    .sec-title{font-size:13px;font-weight:700;color:#7a3a6b;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+    .fgroup{margin-bottom:12px;}
+    label.lbl{display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:#7a6c9f;}
+    input[type=text],input[type=date],input[type=number],textarea,select{width:100%;padding:11px 14px;border-radius:999px;border:1px solid var(--cinza);background:#fff;font-family:'Poppins',sans-serif;font-size:13px;outline:none;transition:.2s;}
+    textarea{border-radius:16px;min-height:62px;resize:vertical;}
+    select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238C7BFF' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;}
+    input:focus,textarea:focus,select:focus{border-color:var(--rosa);box-shadow:0 0 0 2px rgba(255,123,172,.2);}
+    .ilist{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
+    .irow{display:grid;grid-template-columns:2fr 1fr 32px;gap:6px;align-items:center;}
+    .ibtn{width:32px;height:32px;border:none;border-radius:50%;font-size:20px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;}
+    .ibtn-add{background:#FFE4F0;color:#C54C7A;margin-top:8px;}
+    .ibtn-del{background:#FFE4E4;color:#c73232;}
+    .total-row{display:flex;justify-content:space-between;font-size:15px;font-weight:800;color:#7a3a6b;margin:12px 0 5px;padding:10px 14px;background:#FFF5F7;border-radius:999px;}
+    .btn-gerar{width:100%;padding:14px;border:none;border-radius:999px;background:linear-gradient(90deg,var(--rosa),var(--roxo));color:#fff;font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(255,123,172,.35);margin-top:8px;}
+    .previa-card{background:#fff;border-radius:var(--r);padding:18px;box-shadow:var(--sombra);white-space:pre-wrap;font-size:13px;line-height:1.7;color:#4a4a4a;font-family:'Poppins',sans-serif;}
+    .btn-wpp{width:100%;padding:14px;border:none;border-radius:999px;background:linear-gradient(90deg,#25D366,#128C7E);color:#fff;font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(37,211,102,.35);margin-top:12px;}
+    .btn-copy{width:100%;padding:12px;border:none;border-radius:999px;background:#F0EDFF;color:var(--roxo);font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px;}
+    .dados-card{background:#fff;border-radius:var(--r);padding:15px 14px 18px;box-shadow:var(--sombra);}
+    .msg-salvo{font-size:12px;color:#3ECFB2;font-weight:600;margin-top:8px;display:none;}
+    .btn-salvar-dados{width:100%;padding:13px;border:none;border-radius:999px;background:linear-gradient(90deg,var(--rosa),var(--roxo));color:#fff;font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;}
+    .radio-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+    .radio-group label{border:1px solid #e5d9ff;border-radius:999px;padding:6px 12px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-weight:500;color:#7a6c9f;font-size:12px;}
+    .radio-group input[type=radio]{accent-color:var(--rosa);}
+    .vazia{font-size:12px;color:#a08fc7;text-align:center;padding:20px 0;}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="brand">
+      <img src="/icon.png" alt="Orçamento Express"
+        onerror="this.style.display='none'">
+      <div>
+        <h1>Orçamento Express</h1>
+        <p>Gere e envie no WhatsApp na hora</p>
+      </div>
+    </div>
+    <button class="btn-sair" id="btnSair">Sair</button>
+  </header>
+  <main>
+    <div class="tabs">
+      <div class="tab active" data-tab="form">📋 Orçamento</div>
+      <div class="tab" data-tab="previa">👁️ Prévia</div>
+      <div class="tab" data-tab="dados">⚙️ Meus dados</div>
+    </div>
+
+    <!-- ABA FORMULÁRIO -->
+    <div id="panelForm" class="panel active">
+      <div class="fcard">
+        <div class="sec-title">👤 Dados do pedido</div>
+        <div class="fgroup"><label class="lbl">Nome da cliente</label><input type="text" id="fCliente" placeholder="Ex.: Ana Clara"></div>
+        <div class="fgroup"><label class="lbl">Tema da festa</label><input type="text" id="fTema" placeholder="Ex.: Unicórnio aquarelado"></div>
+        <div class="fgroup"><label class="lbl">Data da festa</label><input type="date" id="fDataFesta"></div>
+        <div class="fgroup"><label class="lbl">Data de entrega</label><input type="date" id="fDataEntrega"></div>
+      </div>
+      <div class="fcard">
+        <div class="sec-title">📦 Itens do orçamento</div>
+        <div class="ilist" id="iList"></div>
+        <button class="ibtn ibtn-add" id="btnAddItem">+</button>
+        <div class="total-row"><span>Total do orçamento</span><span id="fTotal">R$ 0,00</span></div>
+      </div>
+      <div class="fcard">
+        <div class="sec-title">💳 Condições de pagamento</div>
+        <div class="fgroup">
+          <label class="lbl">Forma de pagamento</label>
+          <div class="radio-group" id="rgForma">
+            <label><input type="radio" name="forma" value="Pix"> Pix</label>
+            <label><input type="radio" name="forma" value="Cartão de crédito"> Cartão</label>
+            <label><input type="radio" name="forma" value="Pix ou Cartão" checked> Pix ou Cartão</label>
+          </div>
+        </div>
+        <div class="fgroup" id="campoParc" style="display:none">
+          <label class="lbl">Parcelamento</label>
+          <select id="fParc">
+            <option value="1x sem juros">1x sem juros</option>
+            <option value="2x sem juros">2x sem juros</option>
+            <option value="3x sem juros">3x sem juros</option>
+            <option value="até 6x">Até 6x</option>
+            <option value="até 12x">Até 12x</option>
+          </select>
+        </div>
+        <div class="fgroup" id="campoTaxa" style="display:none">
+          <label class="lbl">Taxa do cartão (%)</label>
+          <input type="number" id="fTaxa" min="0" step="0.1" placeholder="Ex.: 3,5">
+        </div>
+        <div class="fgroup">
+          <label class="lbl">Sinal</label>
+          <div class="radio-group" id="rgSinal">
+            <label><input type="radio" name="sinal" value="0" checked> Sem sinal</label>
+            <label><input type="radio" name="sinal" value="30"> 30%</label>
+            <label><input type="radio" name="sinal" value="50"> 50%</label>
+            <label><input type="radio" name="sinal" value="70"> 70%</label>
+            <label><input type="radio" name="sinal" value="100"> 100% antecipado</label>
+          </div>
+        </div>
+        <div class="fgroup" id="campoRestante" style="display:none">
+          <label class="lbl">Restante</label>
+          <div class="radio-group">
+            <label><input type="radio" name="restante" value="na entrega" checked> Na entrega</label>
+            <label><input type="radio" name="restante" value="1 dia antes"> 1 dia antes</label>
+            <label><input type="radio" name="restante" value="3 dias antes"> 3 dias antes</label>
+          </div>
+        </div>
+        <div class="fgroup"><label class="lbl">Observações (opcional)</label><textarea id="fObs" placeholder="Detalhes, combinados, lembretes..."></textarea></div>
+        <button class="btn-gerar" id="btnGerar">✨ Gerar orçamento</button>
+      </div>
+    </div>
+
+    <!-- ABA PRÉVIA -->
+    <div id="panelPrevia" class="panel">
+      <div class="previa-card" id="previaTexto"><span class="vazia">Preencha o orçamento e clique em ✨ Gerar orçamento para ver aqui.</span></div>
+      <button class="btn-wpp" id="btnWpp" style="display:none">💬 Enviar pelo WhatsApp</button>
+      <button class="btn-copy" id="btnCopy" style="display:none">📋 Copiar texto</button>
+    </div>
+
+    <!-- ABA DADOS -->
+    <div id="panelDados" class="panel">
+      <div class="dados-card">
+        <div class="sec-title">🎀 Dados do seu ateliê</div>
+        <div class="fgroup"><label class="lbl">Nome do ateliê</label><input type="text" id="dAtelie" placeholder="Ex.: Ateliê da Mari"></div>
+        <div class="fgroup"><label class="lbl">Seu nome</label><input type="text" id="dNome" placeholder="Ex.: Mariana"></div>
+        <div class="fgroup"><label class="lbl">WhatsApp (com DDD)</label><input type="text" id="dWpp" placeholder="Ex.: 11999999999"></div>
+        <div class="sec-title" style="margin-top:8px;">💸 Dados para Pix</div>
+        <div class="fgroup">
+          <label class="lbl">Tipo de chave Pix</label>
+          <select id="dTipoPix">
+            <option value="CPF">CPF</option>
+            <option value="CNPJ">CNPJ</option>
+            <option value="E-mail">E-mail</option>
+            <option value="Telefone">Telefone</option>
+            <option value="Chave aleatória">Chave aleatória</option>
+          </select>
+        </div>
+        <div class="fgroup"><label class="lbl">Chave Pix</label><input type="text" id="dPix" placeholder="Ex.: 11999999999"></div>
+        <div class="fgroup"><label class="lbl">Nome no Pix</label><input type="text" id="dNomePix" placeholder="Ex.: Mariana Noronha"></div>
+        <button class="btn-salvar-dados" id="btnSalvarDados">💾 Salvar meus dados</button>
+        <p class="msg-salvo" id="msgSalvo">✅ Dados salvos!</p>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+  // Verifica autenticação
+  if(localStorage.getItem("orc_auth")!=="1"){
+    window.location.href="/";
+  }
+
+  const KEY_DADOS="orc_dados";
+  const fmt=v=>Number(v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+  const pv=v=>Number(String(v||0).replace(",","."))||0;
+  let textoGerado="";
+
+  document.getElementById("btnSair").onclick=()=>{
+    localStorage.removeItem("orc_auth");
+    window.location.href="/";
+  };
+
+  // TABS
+  document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");
+    document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+    const name=t.dataset.tab;
+    const pid="panel"+name.charAt(0).toUpperCase()+name.slice(1);
+    document.getElementById(pid).classList.add("active");
+  });
+
+  // ITENS
+  const iList=document.getElementById("iList");
+  function addItemRow(nome="",valor=""){
+    const row=document.createElement("div");row.className="irow";
+    const iN=document.createElement("input");iN.type="text";iN.placeholder="Ex.: Topo de bolo";iN.value=nome;
+    const iV=document.createElement("input");iV.type="number";iV.min="0";iV.step="0.01";iV.placeholder="R$";iV.value=valor;
+    const del=document.createElement("button");del.type="button";del.className="ibtn ibtn-del";del.textContent="−";
+    del.onclick=()=>{row.remove();calcTotal();};
+    iV.oninput=calcTotal;
+    row.append(iN,iV,del);
+    iList.appendChild(row);
+    calcTotal();
+  }
+  function calcTotal(){
+    let t=0;
+    iList.querySelectorAll("input[type=number]").forEach(i=>t+=pv(i.value));
+    document.getElementById("fTotal").textContent=fmt(t);
+  }
+  document.getElementById("btnAddItem").onclick=()=>addItemRow();
+  addItemRow();
+
+  // FORMA PAGAMENTO
+  document.querySelectorAll("input[name=forma]").forEach(r=>r.onchange=()=>{
+    const isCartao=r.value.includes("Cartão")&&r.checked;
+    document.getElementById("campoParc").style.display=isCartao?"block":"none";
+    document.getElementById("campoTaxa").style.display=isCartao?"block":"none";
+  });
+
+  // SINAL
+  document.querySelectorAll("input[name=sinal]").forEach(r=>r.onchange=()=>{
+    const temSinal=r.value!=="0"&&r.value!=="100"&&r.checked;
+    document.getElementById("campoRestante").style.display=temSinal?"block":"none";
+  });
+
+  // DADOS SALVOS
+  function loadDados(){
+    try{return JSON.parse(localStorage.getItem(KEY_DADOS)||"{}");}catch{return{};}
+  }
+  function preencherDados(){
+    const d=loadDados();
+    if(d.atelie)document.getElementById("dAtelie").value=d.atelie;
+    if(d.nome)document.getElementById("dNome").value=d.nome;
+    if(d.wpp)document.getElementById("dWpp").value=d.wpp;
+    if(d.tipoPix)document.getElementById("dTipoPix").value=d.tipoPix;
+    if(d.pix)document.getElementById("dPix").value=d.pix;
+    if(d.nomePix)document.getElementById("dNomePix").value=d.nomePix;
+  }
+  preencherDados();
+
+  document.getElementById("btnSalvarDados").onclick=()=>{
+    const d={
+      atelie:document.getElementById("dAtelie").value.trim(),
+      nome:document.getElementById("dNome").value.trim(),
+      wpp:document.getElementById("dWpp").value.trim(),
+      tipoPix:document.getElementById("dTipoPix").value,
+      pix:document.getElementById("dPix").value.trim(),
+      nomePix:document.getElementById("dNomePix").value.trim()
+    };
+    localStorage.setItem(KEY_DADOS,JSON.stringify(d));
+    const msg=document.getElementById("msgSalvo");
+    msg.style.display="block";
+    setTimeout(()=>msg.style.display="none",3000);
+  };
+
+  // GERAR ORÇAMENTO
+  document.getElementById("btnGerar").onclick=()=>{
+    const cliente=document.getElementById("fCliente").value.trim();
+    if(!cliente){alert("Preencha o nome da cliente.");return;}
+    const tema=document.getElementById("fTema").value.trim();
+    const dataFesta=document.getElementById("fDataFesta").value;
+    const dataEntrega=document.getElementById("fDataEntrega").value;
+    const obs=document.getElementById("fObs").value.trim();
+    const forma=document.querySelector("input[name=forma]:checked")?.value||"Pix ou Cartão";
+    const sinalPct=parseInt(document.querySelector("input[name=sinal]:checked")?.value||"0");
+    const restante=document.querySelector("input[name=restante]:checked")?.value||"na entrega";
+    const parc=document.getElementById("fParc").value;
+    const taxa=pv(document.getElementById("fTaxa").value);
+
+    const itens=[];
+    iList.querySelectorAll(".irow").forEach(row=>{
+      const[n,v]=row.querySelectorAll("input");
+      if(n.value.trim())itens.push({nome:n.value.trim(),valor:pv(v.value)});
+    });
+    if(!itens.length){alert("Adicione pelo menos um item.");return;}
+
+    const total=itens.reduce((a,i)=>a+i.valor,0);
+    const sinalVal=total*(sinalPct/100);
+    const restVal=total-sinalVal;
+
+    const d=loadDados();
+    const fmtDate=s=>{if(!s)return"";const[y,m,dia]=s.split("-");return`${dia}/${m}/${y}`;};
+
+    let txt=`💌 *ORÇAMENTO — ${(d.atelie||"Ateliê").toUpperCase()}*\n`;
+    txt+=`────────────────────\n`;
+    txt+=`👤 *Cliente:* ${cliente}\n`;
+    if(tema)txt+=`🎉 *Tema:* ${tema}\n`;
+    if(dataFesta)txt+=`📅 *Data da festa:* ${fmtDate(dataFesta)}\n`;
+    if(dataEntrega)txt+=`🚚 *Entrega:* ${fmtDate(dataEntrega)}\n`;
+    txt+=`\n📦 *Itens:*\n`;
+    itens.forEach(i=>txt+=`• ${i.nome}: ${fmt(i.valor)}\n`);
+    txt+=`────────────────────\n`;
+    txt+=`💰 *Total: ${fmt(total)}*\n`;
+    txt+=`\n💳 *Pagamento:* ${forma}\n`;
+    if(forma.includes("Cartão")){
+      txt+=`📌 Parcelamento: ${parc}\n`;
+      if(taxa)txt+=`⚠️ Taxa do cartão: ${taxa}%\n`;
+    }
+    if(sinalPct===0){
+      txt+=`💵 Pagamento: na entrega\n`;
+    }else if(sinalPct===100){
+      txt+=`💵 Pagamento: 100% antecipado — ${fmt(total)}\n`;
+    }else{
+      txt+=`💵 Sinal (${sinalPct}%): ${fmt(sinalVal)}\n`;
+      txt+=`💵 Restante (${100-sinalPct}%): ${fmt(restVal)} — ${restante}\n`;
+    }
+    if(d.pix){
+      txt+=`\n💸 *Pix:*\n`;
+      txt+=`Chave (${d.tipoPix||"Pix"}): ${d.pix}\n`;
+      if(d.nomePix)txt+=`Nome: ${d.nomePix}\n`;
+    }
+    if(obs)txt+=`\n📝 *Obs.:* ${obs}\n`;
+    txt+=`\n✨ Obrigada pela confiança!\n`;
+    if(d.nome)txt+=`${d.nome} 🎀`;
+
+    textoGerado=txt;
+    document.getElementById("previaTexto").textContent=txt;
+    document.getElementById("btnWpp").style.display="block";
+    document.getElementById("btnCopy").style.display="block";
+    document.querySelector('.tab[data-tab="previa"]').click();
+  };
+
+  // WHATSAPP
+  document.getElementById("btnWpp").onclick=()=>{
+    if(!textoGerado)return;
+    const d=loadDados();
+    const wpp=d.wpp?d.wpp.replace(/\D/g,""):"";
+    const url=`https://wa.me/${wpp}?text=${encodeURIComponent(textoGerado)}`;
+    window.open(url,"_blank");
+  };
+
+  // COPIAR
+  document.getElementById("btnCopy").onclick=()=>{
+    if(!textoGerado)return;
+    navigator.clipboard.writeText(textoGerado).then(()=>alert("Texto copiado!"));
+  };
+</script>
+</body>
+</html>
