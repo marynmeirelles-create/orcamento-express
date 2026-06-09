@@ -27,6 +27,7 @@
     .lembrar input{accent-color:#FF7BAC;width:15px;height:15px;flex-shrink:0;}
     .btn{width:100%;padding:13px;border:none;border-radius:999px;background:linear-gradient(90deg,#FF7BAC,#8C7BFF);color:#fff;font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(255,123,172,.35);}
     .erro{font-size:12px;color:#c73232;margin-top:10px;min-height:18px;}
+    .dica{font-size:11px;color:#a08fc7;margin-top:12px;}
   </style>
 </head>
 <body>
@@ -38,7 +39,7 @@
   <p class="sub">Gere orçamentos e envie no WhatsApp</p>
   <label for="senha">Senha de acesso</label>
   <div class="pw-wrap">
-    <input type="password" id="senha" placeholder="Digite sua senha" autocomplete="off">
+    <input type="password" id="senha" placeholder="Digite sua senha" autocomplete="new-password">
     <button class="toggle" type="button" id="toggle">Mostrar</button>
   </div>
   <label class="lembrar">
@@ -47,44 +48,51 @@
   </label>
   <button class="btn" id="entrar">Entrar</button>
   <p class="erro" id="erro"></p>
+  <p class="dica">💡 Esqueceu a senha? Use <strong>123</strong></p>
 </div>
 <script>
+  const SENHA_PAD = "123";
+  const K_SENHA   = "orc_senha";
+  const K_AUTH    = "orc_auth";
+  const K_LEMB    = "orc_lembrar";
+
   function getSenha(){
-    return localStorage.getItem("orc_senha")||"orcamento123";
+    return localStorage.getItem(K_SENHA) || SENHA_PAD;
   }
 
-  const inp=document.getElementById("senha");
-  const chk=document.getElementById("lembrar");
-  const erro=document.getElementById("erro");
+  const inp  = document.getElementById("senha");
+  const chk  = document.getElementById("lembrar");
+  const erro = document.getElementById("erro");
 
-  if(localStorage.getItem("orc_lembrar")==="1"){
-    chk.checked=true;
-    inp.value=localStorage.getItem("orc_s")||"";
+  if(localStorage.getItem(K_LEMB) === "1"){
+    chk.checked = true;
+    inp.value   = getSenha();
   }
 
-  document.getElementById("toggle").onclick=function(){
-    const show=inp.type==="password";
-    inp.type=show?"text":"password";
-    this.textContent=show?"Ocultar":"Mostrar";
+  document.getElementById("toggle").onclick = function(){
+    const show = inp.type === "password";
+    inp.type = show ? "text" : "password";
+    this.textContent = show ? "Ocultar" : "Mostrar";
   };
 
-  document.getElementById("entrar").onclick=entrar;
-  inp.onkeydown=e=>{if(e.key==="Enter")entrar();};
+  document.getElementById("entrar").onclick = entrar;
+  inp.onkeydown = e => { if(e.key === "Enter") entrar(); };
 
   function entrar(){
-    const s=inp.value.trim();
-    if(!s){erro.textContent="Digite a senha.";return;}
-    if(s!==getSenha()){erro.textContent="Senha incorreta.";return;}
-    erro.textContent="";
-    if(chk.checked){
-      localStorage.setItem("orc_lembrar","1");
-      localStorage.setItem("orc_s",s);
-    }else{
-      localStorage.removeItem("orc_lembrar");
-      localStorage.removeItem("orc_s");
+    const s = inp.value.trim();
+    if(!s){ erro.textContent = "Digite a senha."; return; }
+    if(s !== getSenha()){
+      erro.textContent = "Senha incorreta. Se esqueceu, use 123.";
+      return;
     }
-    localStorage.setItem("orc_auth","1");
-    window.location.href="/orcamento";
+    erro.textContent = "";
+    if(chk.checked){
+      localStorage.setItem(K_LEMB, "1");
+    } else {
+      localStorage.removeItem(K_LEMB);
+    }
+    localStorage.setItem(K_AUTH, "1");
+    window.location.href = "/orcamento.html";
   }
 </script>
 </body>
