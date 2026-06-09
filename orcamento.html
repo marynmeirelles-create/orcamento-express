@@ -30,7 +30,7 @@
     .sec-title{font-size:13px;font-weight:700;color:#7a3a6b;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
     .fgroup{margin-bottom:12px;}
     label.lbl{display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:#7a6c9f;}
-    input[type=text],input[type=date],input[type=number],textarea,select{width:100%;padding:11px 14px;border-radius:999px;border:1px solid var(--cinza);background:#fff;font-family:'Poppins',sans-serif;font-size:13px;outline:none;transition:.2s;}
+    input[type=text],input[type=date],input[type=number],input[type=password],textarea,select{width:100%;padding:11px 14px;border-radius:999px;border:1px solid var(--cinza);background:#fff;font-family:'Poppins',sans-serif;font-size:13px;outline:none;transition:.2s;}
     textarea{border-radius:16px;min-height:62px;resize:vertical;}
     select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238C7BFF' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;}
     input:focus,textarea:focus,select:focus{border-color:var(--rosa);box-shadow:0 0 0 2px rgba(255,123,172,.2);}
@@ -52,10 +52,11 @@
     .radio-group input[type=radio]{accent-color:var(--rosa);}
     .vazia{font-size:12px;color:#a08fc7;text-align:center;padding:20px 0;}
     .pw-wrap{position:relative;margin-bottom:12px;}
-    .pw-wrap input{padding-right:80px;}
+    .pw-wrap input{padding-right:90px!important;}
     .pw-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;border-radius:999px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;background:#F0EDFF;color:#7a3a6b;font-family:'Poppins',sans-serif;}
     .senha-card{background:#fff;border-radius:var(--r);padding:15px 14px 18px;box-shadow:var(--sombra);margin-top:12px;}
     .msg-erro{font-size:12px;color:#c73232;font-weight:600;margin-top:8px;display:none;}
+    .dica{font-size:11px;color:#a08fc7;background:#FFF5F7;padding:10px 14px;border-radius:12px;margin-bottom:14px;}
   </style>
 </head>
 <body>
@@ -173,256 +174,260 @@
       <!-- CARD ALTERAR SENHA -->
       <div class="senha-card">
         <div class="sec-title">🔒 Alterar senha</div>
+        <p class="dica">💡 Se esquecer a senha, use <strong>123</strong> para entrar — ela sempre funciona!</p>
         <div class="fgroup">
           <label class="lbl">Senha atual</label>
           <div class="pw-wrap">
             <input type="password" id="senhaAtual" placeholder="Digite a senha atual">
-            <button type="button" class="pw-toggle" onclick="toggleSenha('senhaAtual',this)">Mostrar</button>
+            <button type="button" class="pw-toggle" id="togAtual">Mostrar</button>
           </div>
         </div>
         <div class="fgroup">
           <label class="lbl">Nova senha</label>
           <div class="pw-wrap">
-            <input type="password" id="senhaNova" placeholder="Digite a nova senha">
-            <button type="button" class="pw-toggle" onclick="toggleSenha('senhaNova',this)">Mostrar</button>
+            <input type="password" id="senhaNova" placeholder="Mínimo 3 caracteres">
+            <button type="button" class="pw-toggle" id="togNova">Mostrar</button>
           </div>
         </div>
         <div class="fgroup">
           <label class="lbl">Confirmar nova senha</label>
           <div class="pw-wrap">
-            <input type="password" id="senhaConfirm" placeholder="Confirme a nova senha">
-            <button type="button" class="pw-toggle" onclick="toggleSenha('senhaConfirm',this)">Mostrar</button>
+            <input type="password" id="senhaConfirm" placeholder="Repita a nova senha">
+            <button type="button" class="pw-toggle" id="togConfirm">Mostrar</button>
           </div>
         </div>
-        <button class="btn-salvar-dados" id="btnAlterarSenha">🔒 Alterar senha</button>
-        <p class="msg-salvo" id="msgSenhaOk" style="display:none;">✅ Senha alterada com sucesso!</p>
+        <button class="btn-salvar-dados" id="btnAlterarSenha">🔒 Salvar nova senha</button>
+        <p class="msg-salvo" id="msgSenhaOk" style="display:none">✅ Senha alterada com sucesso!</p>
         <p class="msg-erro" id="msgSenhaErro"></p>
       </div>
     </div>
   </main>
 </div>
 <script>
-  if(localStorage.getItem("orc_auth")!=="1"){
-    window.location.href="/";
-  }
+  const K_AUTH    = "orc_auth";
+  const K_SENHA   = "orc_senha";
+  const K_DADOS   = "orc_dados";
+  const SENHA_PAD = "123";
 
-  const KEY_DADOS="orc_dados";
-  const KEY_SENHA="orc_senha";
-  const fmt=v=>Number(v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
-  const pv=v=>Number(String(v||0).replace(",","."))||0;
-  let textoGerado="";
+  if(localStorage.getItem(K_AUTH) !== "1"){
+    window.location.href = "/";
+  }
 
   function getSenhaAtual(){
-    return localStorage.getItem(KEY_SENHA)||"orcamento123";
+    return localStorage.getItem(K_SENHA) || SENHA_PAD;
   }
 
-  document.getElementById("btnSair").onclick=()=>{
-    localStorage.removeItem("orc_auth");
-    window.location.href="/";
+  const fmt = v => Number(v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+  const pv  = v => Number(String(v||0).replace(",","."))||0;
+  let textoGerado = "";
+
+  // SAIR
+  document.getElementById("btnSair").onclick = () => {
+    localStorage.removeItem(K_AUTH);
+    window.location.href = "/";
   };
 
   // TABS
-  document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
-    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t => t.onclick = () => {
+    document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
     t.classList.add("active");
-    document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
-    const name=t.dataset.tab;
-    const pid="panel"+name.charAt(0).toUpperCase()+name.slice(1);
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    const name = t.dataset.tab;
+    const pid  = "panel" + name.charAt(0).toUpperCase() + name.slice(1);
     document.getElementById(pid).classList.add("active");
   });
 
   // ITENS
-  const iList=document.getElementById("iList");
-  function addItemRow(nome="",valor=""){
-    const row=document.createElement("div");row.className="irow";
-    const iN=document.createElement("input");iN.type="text";iN.placeholder="Ex.: Topo de bolo";iN.value=nome;
-    const iV=document.createElement("input");iV.type="number";iV.min="0";iV.step="0.01";iV.placeholder="R$";iV.value=valor;
-    const del=document.createElement("button");del.type="button";del.className="ibtn ibtn-del";del.textContent="−";
-    del.onclick=()=>{row.remove();calcTotal();};
-    iV.oninput=calcTotal;
-    row.append(iN,iV,del);
+  const iList = document.getElementById("iList");
+  function addItemRow(nome="", valor=""){
+    const row = document.createElement("div"); row.className = "irow";
+    const iN  = document.createElement("input"); iN.type="text"; iN.placeholder="Ex.: Topo de bolo"; iN.value=nome;
+    const iV  = document.createElement("input"); iV.type="number"; iV.min="0"; iV.step="0.01"; iV.placeholder="R$"; iV.value=valor;
+    const del = document.createElement("button"); del.type="button"; del.className="ibtn ibtn-del"; del.textContent="−";
+    del.onclick = () => { row.remove(); calcTotal(); };
+    iV.oninput  = calcTotal;
+    row.append(iN, iV, del);
     iList.appendChild(row);
     calcTotal();
   }
   function calcTotal(){
-    let t=0;
-    iList.querySelectorAll("input[type=number]").forEach(i=>t+=pv(i.value));
-    document.getElementById("fTotal").textContent=fmt(t);
+    let t = 0;
+    iList.querySelectorAll("input[type=number]").forEach(i => t += pv(i.value));
+    document.getElementById("fTotal").textContent = fmt(t);
   }
-  document.getElementById("btnAddItem").onclick=()=>addItemRow();
+  document.getElementById("btnAddItem").onclick = () => addItemRow();
   addItemRow();
 
   // FORMA PAGAMENTO
-  document.querySelectorAll("input[name=forma]").forEach(r=>r.onchange=()=>{
-    const isCartao=r.value.includes("Cartão")&&r.checked;
-    document.getElementById("campoParc").style.display=isCartao?"block":"none";
-    document.getElementById("campoTaxa").style.display=isCartao?"block":"none";
+  document.querySelectorAll("input[name=forma]").forEach(r => r.onchange = () => {
+    const isCartao = r.value.includes("Cartão") && r.checked;
+    document.getElementById("campoParc").style.display = isCartao ? "block" : "none";
+    document.getElementById("campoTaxa").style.display = isCartao ? "block" : "none";
   });
 
   // SINAL
-  document.querySelectorAll("input[name=sinal]").forEach(r=>r.onchange=()=>{
-    const temSinal=r.value!=="0"&&r.value!=="100"&&r.checked;
-    document.getElementById("campoRestante").style.display=temSinal?"block":"none";
+  document.querySelectorAll("input[name=sinal]").forEach(r => r.onchange = () => {
+    const temSinal = r.value !== "0" && r.value !== "100" && r.checked;
+    document.getElementById("campoRestante").style.display = temSinal ? "block" : "none";
   });
 
   // DADOS SALVOS
   function loadDados(){
-    try{return JSON.parse(localStorage.getItem(KEY_DADOS)||"{}");}catch{return{};}
+    try{ return JSON.parse(localStorage.getItem(K_DADOS)||"{}"); }catch{ return{}; }
   }
   function preencherDados(){
-    const d=loadDados();
-    if(d.atelie)document.getElementById("dAtelie").value=d.atelie;
-    if(d.nome)document.getElementById("dNome").value=d.nome;
-    if(d.wpp)document.getElementById("dWpp").value=d.wpp;
-    if(d.tipoPix)document.getElementById("dTipoPix").value=d.tipoPix;
-    if(d.pix)document.getElementById("dPix").value=d.pix;
-    if(d.nomePix)document.getElementById("dNomePix").value=d.nomePix;
+    const d = loadDados();
+    if(d.atelie)  document.getElementById("dAtelie").value  = d.atelie;
+    if(d.nome)    document.getElementById("dNome").value    = d.nome;
+    if(d.wpp)     document.getElementById("dWpp").value     = d.wpp;
+    if(d.tipoPix) document.getElementById("dTipoPix").value = d.tipoPix;
+    if(d.pix)     document.getElementById("dPix").value     = d.pix;
+    if(d.nomePix) document.getElementById("dNomePix").value = d.nomePix;
   }
   preencherDados();
 
-  document.getElementById("btnSalvarDados").onclick=()=>{
-    const d={
-      atelie:document.getElementById("dAtelie").value.trim(),
-      nome:document.getElementById("dNome").value.trim(),
-      wpp:document.getElementById("dWpp").value.trim(),
-      tipoPix:document.getElementById("dTipoPix").value,
-      pix:document.getElementById("dPix").value.trim(),
-      nomePix:document.getElementById("dNomePix").value.trim()
+  document.getElementById("btnSalvarDados").onclick = () => {
+    const d = {
+      atelie:  document.getElementById("dAtelie").value.trim(),
+      nome:    document.getElementById("dNome").value.trim(),
+      wpp:     document.getElementById("dWpp").value.trim(),
+      tipoPix: document.getElementById("dTipoPix").value,
+      pix:     document.getElementById("dPix").value.trim(),
+      nomePix: document.getElementById("dNomePix").value.trim()
     };
-    localStorage.setItem(KEY_DADOS,JSON.stringify(d));
-    const msg=document.getElementById("msgSalvo");
-    msg.style.display="block";
-    setTimeout(()=>msg.style.display="none",3000);
+    localStorage.setItem(K_DADOS, JSON.stringify(d));
+    const msg = document.getElementById("msgSalvo");
+    msg.style.display = "block";
+    setTimeout(() => msg.style.display = "none", 3000);
   };
 
   // TOGGLE SENHA
-  function toggleSenha(id,btn){
-    const inp=document.getElementById(id);
-    const show=inp.type==="password";
-    inp.type=show?"text":"password";
-    btn.textContent=show?"Ocultar":"Mostrar";
-  }
+  document.getElementById("togAtual").onclick = function(){
+    const i = document.getElementById("senhaAtual");
+    const show = i.type === "password";
+    i.type = show ? "text" : "password";
+    this.textContent = show ? "Ocultar" : "Mostrar";
+  };
+  document.getElementById("togNova").onclick = function(){
+    const i = document.getElementById("senhaNova");
+    const show = i.type === "password";
+    i.type = show ? "text" : "password";
+    this.textContent = show ? "Ocultar" : "Mostrar";
+  };
+  document.getElementById("togConfirm").onclick = function(){
+    const i = document.getElementById("senhaConfirm");
+    const show = i.type === "password";
+    i.type = show ? "text" : "password";
+    this.textContent = show ? "Ocultar" : "Mostrar";
+  };
 
   // ALTERAR SENHA
-  document.getElementById("btnAlterarSenha").onclick=()=>{
-    const atual=document.getElementById("senhaAtual").value.trim();
-    const nova=document.getElementById("senhaNova").value.trim();
-    const confirm=document.getElementById("senhaConfirm").value.trim();
-    const msgOk=document.getElementById("msgSenhaOk");
-    const msgErro=document.getElementById("msgSenhaErro");
-
-    msgOk.style.display="none";
-    msgErro.style.display="none";
-
-    if(!atual||!nova||!confirm){
-      msgErro.style.display="block";
-      msgErro.textContent="⚠️ Preencha todos os campos.";
-      return;
+  document.getElementById("btnAlterarSenha").onclick = function(){
+    const atual    = document.getElementById("senhaAtual").value.trim();
+    const nova     = document.getElementById("senhaNova").value.trim();
+    const confirma = document.getElementById("senhaConfirm").value.trim();
+    const msgOk    = document.getElementById("msgSenhaOk");
+    const msgErro  = document.getElementById("msgSenhaErro");
+    msgOk.style.display   = "none";
+    msgErro.style.display = "none";
+    if(!atual || !nova || !confirma){
+      msgErro.textContent   = "⚠️ Preencha todos os campos.";
+      msgErro.style.display = "block"; return;
     }
-    if(atual!==getSenhaAtual()){
-      msgErro.style.display="block";
-      msgErro.textContent="❌ Senha atual incorreta.";
-      return;
+    if(atual !== getSenhaAtual()){
+      msgErro.textContent   = "❌ Senha atual incorreta.";
+      msgErro.style.display = "block"; return;
     }
-    if(nova.length<6){
-      msgErro.style.display="block";
-      msgErro.textContent="⚠️ A nova senha precisa ter pelo menos 6 caracteres.";
-      return;
+    if(nova.length < 3){
+      msgErro.textContent   = "⚠️ A senha precisa ter pelo menos 3 caracteres.";
+      msgErro.style.display = "block"; return;
     }
-    if(nova!==confirm){
-      msgErro.style.display="block";
-      msgErro.textContent="❌ As senhas não coincidem.";
-      return;
+    if(nova !== confirma){
+      msgErro.textContent   = "❌ As senhas não coincidem.";
+      msgErro.style.display = "block"; return;
     }
-
-    localStorage.setItem(KEY_SENHA,nova);
-    msgOk.style.display="block";
-    document.getElementById("senhaAtual").value="";
-    document.getElementById("senhaNova").value="";
-    document.getElementById("senhaConfirm").value="";
-    setTimeout(()=>msgOk.style.display="none",3000);
+    localStorage.setItem(K_SENHA, nova);
+    msgOk.style.display = "block";
+    document.getElementById("senhaAtual").value   = "";
+    document.getElementById("senhaNova").value    = "";
+    document.getElementById("senhaConfirm").value = "";
+    setTimeout(() => msgOk.style.display = "none", 3000);
   };
 
   // GERAR ORÇAMENTO
-  document.getElementById("btnGerar").onclick=()=>{
-    const cliente=document.getElementById("fCliente").value.trim();
-    if(!cliente){alert("Preencha o nome da cliente.");return;}
-    const tema=document.getElementById("fTema").value.trim();
-    const dataFesta=document.getElementById("fDataFesta").value;
-    const dataEntrega=document.getElementById("fDataEntrega").value;
-    const obs=document.getElementById("fObs").value.trim();
-    const forma=document.querySelector("input[name=forma]:checked")?.value||"Pix ou Cartão";
-    const sinalPct=parseInt(document.querySelector("input[name=sinal]:checked")?.value||"0");
-    const restante=document.querySelector("input[name=restante]:checked")?.value||"na entrega";
-    const parc=document.getElementById("fParc").value;
-    const taxa=pv(document.getElementById("fTaxa").value);
-
-    const itens=[];
-    iList.querySelectorAll(".irow").forEach(row=>{
-      const[n,v]=row.querySelectorAll("input");
-      if(n.value.trim())itens.push({nome:n.value.trim(),valor:pv(v.value)});
+  document.getElementById("btnGerar").onclick = () => {
+    const cliente     = document.getElementById("fCliente").value.trim();
+    if(!cliente){ alert("Preencha o nome da cliente."); return; }
+    const tema        = document.getElementById("fTema").value.trim();
+    const dataFesta   = document.getElementById("fDataFesta").value;
+    const dataEntrega = document.getElementById("fDataEntrega").value;
+    const obs         = document.getElementById("fObs").value.trim();
+    const forma       = document.querySelector("input[name=forma]:checked")?.value || "Pix ou Cartão";
+    const sinalPct    = parseInt(document.querySelector("input[name=sinal]:checked")?.value || "0");
+    const restante    = document.querySelector("input[name=restante]:checked")?.value || "na entrega";
+    const parc        = document.getElementById("fParc").value;
+    const taxa        = pv(document.getElementById("fTaxa").value);
+    const itens       = [];
+    iList.querySelectorAll(".irow").forEach(row => {
+      const[n,v] = row.querySelectorAll("input");
+      if(n.value.trim()) itens.push({nome: n.value.trim(), valor: pv(v.value)});
     });
-    if(!itens.length){alert("Adicione pelo menos um item.");return;}
-
-    const total=itens.reduce((a,i)=>a+i.valor,0);
-    const sinalVal=total*(sinalPct/100);
-    const restVal=total-sinalVal;
-
-    const d=loadDados();
-    const fmtDate=s=>{if(!s)return"";const[y,m,dia]=s.split("-");return`${dia}/${m}/${y}`;};
-
-    let txt=`💌 *ORÇAMENTO — ${(d.atelie||"Ateliê").toUpperCase()}*\n`;
-    txt+=`────────────────────\n`;
-    txt+=`👤 *Cliente:* ${cliente}\n`;
-    if(tema)txt+=`🎉 *Tema:* ${tema}\n`;
-    if(dataFesta)txt+=`📅 *Data da festa:* ${fmtDate(dataFesta)}\n`;
-    if(dataEntrega)txt+=`🚚 *Entrega:* ${fmtDate(dataEntrega)}\n`;
-    txt+=`\n📦 *Itens:*\n`;
-    itens.forEach(i=>txt+=`• ${i.nome}: ${fmt(i.valor)}\n`);
-    txt+=`────────────────────\n`;
-    txt+=`💰 *Total: ${fmt(total)}*\n`;
-    txt+=`\n💳 *Pagamento:* ${forma}\n`;
+    if(!itens.length){ alert("Adicione pelo menos um item."); return; }
+    const total    = itens.reduce((a,i) => a+i.valor, 0);
+    const sinalVal = total * (sinalPct/100);
+    const restVal  = total - sinalVal;
+    const d        = loadDados();
+    const fmtDate  = s => { if(!s) return ""; const[y,m,dia]=s.split("-"); return `${dia}/${m}/${y}`; };
+    let txt = `💌 *ORÇAMENTO — ${(d.atelie||"Ateliê").toUpperCase()}*\n`;
+    txt += `────────────────────\n`;
+    txt += `👤 *Cliente:* ${cliente}\n`;
+    if(tema)        txt += `🎉 *Tema:* ${tema}\n`;
+    if(dataFesta)   txt += `📅 *Data da festa:* ${fmtDate(dataFesta)}\n`;
+    if(dataEntrega) txt += `🚚 *Entrega:* ${fmtDate(dataEntrega)}\n`;
+    txt += `\n📦 *Itens:*\n`;
+    itens.forEach(i => txt += `• ${i.nome}: ${fmt(i.valor)}\n`);
+    txt += `────────────────────\n`;
+    txt += `💰 *Total: ${fmt(total)}*\n`;
+    txt += `\n💳 *Pagamento:* ${forma}\n`;
     if(forma.includes("Cartão")){
-      txt+=`📌 Parcelamento: ${parc}\n`;
-      if(taxa)txt+=`⚠️ Taxa do cartão: ${taxa}%\n`;
+      txt += `📌 Parcelamento: ${parc}\n`;
+      if(taxa) txt += `⚠️ Taxa do cartão: ${taxa}%\n`;
     }
-    if(sinalPct===0){
-      txt+=`💵 Pagamento: na entrega\n`;
-    }else if(sinalPct===100){
-      txt+=`💵 Pagamento: 100% antecipado — ${fmt(total)}\n`;
-    }else{
-      txt+=`💵 Sinal (${sinalPct}%): ${fmt(sinalVal)}\n`;
-      txt+=`💵 Restante (${100-sinalPct}%): ${fmt(restVal)} — ${restante}\n`;
+    if(sinalPct === 0){
+      txt += `💵 Pagamento: na entrega\n`;
+    } else if(sinalPct === 100){
+      txt += `💵 Pagamento: 100% antecipado — ${fmt(total)}\n`;
+    } else {
+      txt += `💵 Sinal (${sinalPct}%): ${fmt(sinalVal)}\n`;
+      txt += `💵 Restante (${100-sinalPct}%): ${fmt(restVal)} — ${restante}\n`;
     }
     if(d.pix){
-      txt+=`\n💸 *Pix:*\n`;
-      txt+=`Chave (${d.tipoPix||"Pix"}): ${d.pix}\n`;
-      if(d.nomePix)txt+=`Nome: ${d.nomePix}\n`;
+      txt += `\n💸 *Pix:*\n`;
+      txt += `Chave (${d.tipoPix||"Pix"}): ${d.pix}\n`;
+      if(d.nomePix) txt += `Nome: ${d.nomePix}\n`;
     }
-    if(obs)txt+=`\n📝 *Obs.:* ${obs}\n`;
-    txt+=`\n✨ Obrigada pela confiança!\n`;
-    if(d.nome)txt+=`${d.nome} 🎀`;
-
-    textoGerado=txt;
-    document.getElementById("previaTexto").textContent=txt;
-    document.getElementById("btnWpp").style.display="block";
-    document.getElementById("btnCopy").style.display="block";
+    if(obs) txt += `\n📝 *Obs.:* ${obs}\n`;
+    txt += `\n✨ Obrigada pela confiança!\n`;
+    if(d.nome) txt += `${d.nome} 🎀`;
+    textoGerado = txt;
+    document.getElementById("previaTexto").textContent = txt;
+    document.getElementById("btnWpp").style.display  = "block";
+    document.getElementById("btnCopy").style.display = "block";
     document.querySelector('.tab[data-tab="previa"]').click();
   };
 
   // WHATSAPP
-  document.getElementById("btnWpp").onclick=()=>{
-    if(!textoGerado)return;
-    const d=loadDados();
-    const wpp=d.wpp?d.wpp.replace(/\D/g,""):"";
-    const url=`https://wa.me/${wpp}?text=${encodeURIComponent(textoGerado)}`;
-    window.open(url,"_blank");
+  document.getElementById("btnWpp").onclick = () => {
+    if(!textoGerado) return;
+    const d   = loadDados();
+    const wpp = d.wpp ? d.wpp.replace(/\D/g,"") : "";
+    window.open(`https://wa.me/${wpp}?text=${encodeURIComponent(textoGerado)}`, "_blank");
   };
 
   // COPIAR
-  document.getElementById("btnCopy").onclick=()=>{
-    if(!textoGerado)return;
-    navigator.clipboard.writeText(textoGerado).then(()=>alert("Texto copiado!"));
+  document.getElementById("btnCopy").onclick = () => {
+    if(!textoGerado) return;
+    navigator.clipboard.writeText(textoGerado).then(() => alert("Texto copiado!"));
   };
 </script>
 </body>
