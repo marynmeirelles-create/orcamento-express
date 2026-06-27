@@ -33,13 +33,17 @@
       .hist-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
       .hist-actions button,.backup-actions button{border:none;border-radius:999px;padding:9px 10px;font-size:11px;font-weight:700;cursor:pointer;background:#F0EDFF;color:#8C7BFF;font-family:'Poppins',sans-serif;}
       .hist-actions .danger{background:#FFE4E4;color:#c73232;}
-      .backup-box{background:#FFF9FC;border:1px solid #F2EAF8;border-radius:16px;padding:12px;margin-top:8px;}
+      .backup-box,.prod-picker{background:#FFF9FC;border:1px solid #F2EAF8;border-radius:16px;padding:12px;margin-top:8px;}
       .backup-box p,.backup-box li{font-size:11px;color:#7a6c9f;line-height:1.55;}
       .backup-box ul{padding-left:18px;margin:8px 0;}
       .backup-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
       .backup-actions input[type=file]{grid-column:1/-1;border-radius:14px;font-size:12px;background:#fff;}
       .backup-small{font-size:10px;color:#a08fc7;margin-top:8px;line-height:1.45;}
       .hist-empty{font-size:12px;color:#a08fc7;text-align:center;background:#FFF9FC;border-radius:14px;padding:16px;}
+      .prod-picker-title{font-size:12px;font-weight:800;color:#7a3a6b;margin-bottom:8px;}
+      .prod-picker-grid{display:grid;grid-template-columns:1fr 76px;gap:8px;align-items:end;}
+      .prod-picker button{grid-column:1/-1;border:none;border-radius:999px;padding:11px;background:#F0EDFF;color:#8C7BFF;font-size:12px;font-weight:800;cursor:pointer;font-family:'Poppins',sans-serif;}
+      .prod-picker .hint{grid-column:1/-1;margin-top:2px;}
     `;
     document.head.appendChild(style);
   }
@@ -52,7 +56,7 @@
     const tab = document.createElement("div");
     tab.className = "tab";
     tab.dataset.tab = "historico";
-    tab.textContent = "🗂️ Histórico";
+    tab.textContent = "Histórico";
     tabs.insertBefore(tab, tabs.querySelector('[data-tab="dados"]'));
 
     const panel = document.createElement("div");
@@ -60,7 +64,7 @@
     panel.className = "panel";
     panel.innerHTML = `
       <div class="fcard">
-        <div class="sec-title">🗂️ Catálogo de orçamentos</div>
+        <div class="sec-title">Catálogo de orçamentos</div>
         <div class="fgroup"><label class="lbl">Buscar por cliente, tema ou item</label><input type="text" id="histBusca" placeholder="Digite para buscar"></div>
         <div class="hist-list" id="histList"></div>
       </div>
@@ -78,6 +82,59 @@
     $("histBusca").oninput = renderHistorico;
   }
 
+  function ensureProductPicker() {
+    if ($("prodPicker")) return;
+    const list = $("iList");
+    if (!list) return;
+    const picker = document.createElement("div");
+    picker.className = "prod-picker";
+    picker.id = "prodPicker";
+    picker.innerHTML = `
+      <div class="prod-picker-title">Inserir produto cadastrado</div>
+      <div class="prod-picker-grid">
+        <div><label class="mini-label">Produto salvo</label><select id="prodEscolhido"></select></div>
+        <div><label class="mini-label">Qtd.</label><input type="number" id="prodQtd" min="1" step="1" value="1"></div>
+        <button type="button" id="btnInserirProduto">Inserir no orçamento</button>
+        <p class="hint">Cadastre produtos em Meus dados. Depois escolha aqui para preencher o orçamento automaticamente.</p>
+      </div>
+    `;
+    list.parentElement.insertBefore(picker, list);
+    $("btnInserirProduto").onclick = inserirProdutoNoOrcamento;
+    renderProdutosPicker();
+  }
+
+  function renderProdutosPicker() {
+    const select = $("prodEscolhido");
+    if (!select) return;
+    const produtos = loadJSON(K_PRODUTOS, []);
+    select.innerHTML = produtos.length
+      ? produtos.map((p, i) => `<option value="${i}">${escapeHTML(p.nome)} - ${fmt(p.valor)}</option>`).join("")
+      : '<option value="">Nenhum produto cadastrado</option>';
+  }
+
+  function inserirProdutoNoOrcamento() {
+    const produtos = loadJSON(K_PRODUTOS, []);
+    const idx = Number($("prodEscolhido")?.value);
+    const p = produtos[idx];
+    if (!p) { alert("Cadastre um produto em Meus dados primeiro."); return; }
+    const qtd = Math.max(1, parseInt($("prodQtd")?.value || "1"));
+    if (typeof window.addItemRow === "function") {
+      window.addItemRow(p.nome, String(qtd), String(p.valor || ""));
+      return;
+    }
+    const btn = $("btnAddItem");
+    btn?.click();
+    const rows = document.querySelectorAll("#iList .irow");
+    const row = rows[rows.length - 1];
+    const inputs = row?.querySelectorAll("input");
+    if (inputs?.length >= 3) {
+      inputs[0].value = p.nome;
+      inputs[1].value = qtd;
+      inputs[2].value = p.valor || "";
+      inputs[2].dispatchEvent(new Event("input", { bubbles: true }));
+    }
+  }
+
   function ensureBackupCard() {
     const panel = $("panelDados");
     if (!panel || $("backupCard")) return;
@@ -85,7 +142,7 @@
     card.className = "dados-card";
     card.id = "backupCard";
     card.innerHTML = `
-      <div class="sec-title">☁️ Backup dos dados</div>
+      <div class="sec-title">Backup dos dados</div>
       <div class="backup-box">
         <p><strong>Onde os dados ficam salvos:</strong> seus dados, produtos, logomarca e orçamentos ficam guardados no navegador deste aparelho.</p>
         <p><strong>Por que fazer backup:</strong> se limpar os dados do navegador, trocar de celular, desinstalar o app ou reinstalar, essas informações podem sumir. O backup cria um arquivo para restaurar tudo depois.</p>
@@ -164,7 +221,7 @@
       const card = document.createElement("div");
       card.className = "hist-card";
       card.innerHTML = `
-        <div class="hist-top"><div><div class="hist-title">${escapeHTML(o.cliente || "Cliente")}</div><div class="hist-meta">${escapeHTML(o.status || "Salvo")} • ${dataBR(o.criadoEm)}${o.tema ? " • " + escapeHTML(o.tema) : ""}</div></div><div class="hist-total">${escapeHTML(o.totalTxt || "")}</div></div>
+        <div class="hist-top"><div><div class="hist-title">${escapeHTML(o.cliente || "Cliente")}</div><div class="hist-meta">${escapeHTML(o.status || "Salvo")} - ${dataBR(o.criadoEm)}${o.tema ? " - " + escapeHTML(o.tema) : ""}</div></div><div class="hist-total">${escapeHTML(o.totalTxt || "")}</div></div>
         <div class="hist-actions"><button type="button" data-action="ver">Ver texto</button><button type="button" data-action="copiar">Copiar</button><button type="button" data-action="whats">WhatsApp</button><button type="button" class="danger" data-action="excluir">Excluir</button></div>
         <div class="hist-text"></div>
       `;
@@ -244,7 +301,7 @@
     if (!out) return;
     const dias = Number(localStorage.getItem(K_BACKUP_DIAS) || 0);
     const ultimo = localStorage.getItem(K_BACKUP_ULTIMO);
-    out.textContent = ultimo ? `Último backup: ${dataBR(ultimo)}${dias ? ` • alerta a cada ${dias} dias` : ""}` : (dias ? `Alerta configurado a cada ${dias} dias. Nenhum backup registrado ainda.` : "Nenhum alerta de backup configurado.");
+    out.textContent = ultimo ? `Último backup: ${dataBR(ultimo)}${dias ? ` - alerta a cada ${dias} dias` : ""}` : (dias ? `Alerta configurado a cada ${dias} dias. Nenhum backup registrado ainda.` : "Nenhum alerta de backup configurado.");
   }
 
   function checkBackupReminder() {
@@ -264,6 +321,76 @@
     $("btnSharePdf")?.addEventListener("click", () => salvarOrcamento("PDF compartilhado"));
   }
 
+  function textoParaPdf(texto) {
+    return String(texto || "")
+      .replace(/💌/g, "")
+      .replace(/👤/g, "Cliente:")
+      .replace(/🎉/g, "Tema:")
+      .replace(/📅/g, "Data:")
+      .replace(/🚚/g, "Entrega/Frete:")
+      .replace(/📦/g, "Itens:")
+      .replace(/🧾/g, "Subtotal:")
+      .replace(/💰/g, "Total:")
+      .replace(/💳/g, "Pagamento:")
+      .replace(/📌/g, "Parcelamento:")
+      .replace(/⚠️|⚠/g, "Atenção:")
+      .replace(/💵/g, "Pagamento:")
+      .replace(/💸/g, "Pix:")
+      .replace(/📝/g, "Observação:")
+      .replace(/✨/g, "")
+      .replace(/🎀/g, "")
+      .replace(/[•]/g, "-")
+      .replace(/[—–]/g, "-")
+      .replace(/[─]+/g, "------------------------------")
+      .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "")
+      .replace(/[*_`]/g, "")
+      .replace(/\s+:/g, ":")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+  }
+
+  function corrigirPdf() {
+    const originalBaixar = window.baixarPdf;
+    const originalCompartilhar = window.compartilharPdf;
+
+    window.criarPdfBlob = function criarPdfBlobCorrigido() {
+      return new Promise(resolve => {
+        const jsPDF = window.jspdf?.jsPDF;
+        if (!jsPDF || !window.ultimoOrcamento) { resolve(null); return; }
+        const doc = new jsPDF({ unit: "mm", format: "a4" });
+        const dados = window.ultimoOrcamento.dados || loadJSON(K_DADOS, {});
+        const logo = window.ultimoOrcamento.logo || localStorage.getItem(K_LOGO) || "";
+        const texto = textoParaPdf(window.ultimoOrcamento.texto || "");
+        let y = 20;
+        if (logo) {
+          try { doc.addImage(logo, "PNG", 14, 12, 24, 24); } catch {}
+        }
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(17);
+        doc.setTextColor(140, 123, 255);
+        doc.text(dados.atelie || "Orçamento Express", logo ? 44 : 14, 22);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.setTextColor(120, 108, 159);
+        doc.text("Orçamento gerado pelo Orçamento Express", logo ? 44 : 14, 29);
+        doc.setDrawColor(255, 123, 172);
+        doc.line(14, 40, 196, 40);
+        y = 50;
+        doc.setTextColor(55, 55, 55);
+        doc.setFontSize(11);
+        doc.splitTextToSize(texto, 180).forEach(line => {
+          if (y > 280) { doc.addPage(); y = 18; }
+          doc.text(line, 14, y);
+          y += 6;
+        });
+        resolve(doc.output("blob"));
+      });
+    };
+
+    if (typeof originalBaixar === "function") window.baixarPdf = originalBaixar;
+    if (typeof originalCompartilhar === "function") window.compartilharPdf = originalCompartilhar;
+  }
+
   function escapeHTML(value) {
     return String(value || "").replace(/[&<>'"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[ch]));
   }
@@ -271,8 +398,10 @@
   function init() {
     injectStyle();
     ensureTabs();
+    ensureProductPicker();
     ensureBackupCard();
     hookExistingButtons();
+    corrigirPdf();
     renderHistorico();
     checkBackupReminder();
   }
