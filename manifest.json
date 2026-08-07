@@ -2,7 +2,7 @@
   "name": "Orçamento Express",
   "short_name": "Orçamento",
   "description": "Gere orçamentos e envie no WhatsApp",
-  "start_url": "/orcamento.html",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#FFF5F7",
