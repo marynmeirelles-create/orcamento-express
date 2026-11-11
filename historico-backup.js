@@ -258,9 +258,10 @@
     const payload = {
       tipo: "orcamento-express", versao: 1,
       cliente: form.cliente, telefone: form.telefone || "", tema: form.tema || "",
+      nomePersonalizado: form.nomePersonalizado || "", idadePersonalizada: form.idadePersonalizada || "",
       dataFesta: form.dataFesta || "", dataEntrega: form.dataEntrega || "",
       entrega: form.tipoFrete || "", frete: Number(form.freteValor) || 0,
-      observacoes: [form.nomePersonalizado ? "Nome para personalizar: " + form.nomePersonalizado : "", form.idadePersonalizada ? "Idade para personalizar: " + form.idadePersonalizada : "", form.obs, form.transpNome ? "Transportadora: " + form.transpNome : ""].filter(Boolean).join("\n"),
+      observacoes: [form.obs, form.transpNome ? "Transportadora: " + form.transpNome : ""].filter(Boolean).join("\n"),
       itens: form.itens.map(item => ({ nome: item.nome, quantidade: item.qtd, preco: item.valorUnit }))
     };
     const destination = "https://pedidoemdia.mundodasideias.online/#importar-orcamento";
