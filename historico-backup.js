@@ -60,7 +60,8 @@
     dialog.setAttribute("aria-labelledby", "savedBackupTitle");
     dialog.style.cssText = "width:min(92vw,420px);margin:auto;padding:20px;border:1px solid #F2EAF8;border-radius:16px;color:#5d527c";
     dialog.innerHTML = '<h2 id="savedBackupTitle">Orçamento salvo!</h2>' +
-      '<p>Guarde uma cópia atualizada na sua nuvem para recuperar seus dados se trocar ou perder o celular.</p><p role="status"></p>' +
+      '<p>Quer guardar uma cópia dos seus orçamentos para usar quando trocar de celular? Toque em <strong>Guardar cópia na nuvem</strong> e escolha onde salvar, como no Google Drive ou no iCloud Drive. Se quiser, use sempre a mesma pasta para encontrar suas cópias com facilidade.</p>' +
+      '<p>Se preferir fazer isso depois, toque em <strong>Agora não</strong>. A opção fica em <strong>Meus dados → Backup dos dados</strong>.</p><p role="status"></p>' +
       '<div class="backup-actions"><button type="button" data-cloud>Guardar cópia na nuvem</button>' +
       '<button type="button" data-download hidden>Baixar arquivo</button>' +
       '<button type="button" data-later>Agora não</button></div>';
@@ -106,13 +107,11 @@
         report("Confira se o arquivo apareceu na pasta escolhida na sua nuvem.");
         return;
       }
-      report("Toque em Baixar arquivo e guarde a cópia no iCloud Drive, no Google Drive ou na nuvem que você usa.");
-      return false;
     } catch (error) {
       if (error.name === "AbortError") return;
-      report("Toque em Baixar arquivo e guarde a cópia no iCloud Drive, no Google Drive ou na nuvem que você usa.");
-      return false;
     }
+    report("Toque em Baixar arquivo. Depois, procure o arquivo em Downloads e guarde uma cópia no Google Drive, no iCloud Drive ou na nuvem que você usa.");
+    return false;
   }
 
   function connectBackupDialog(dialog) {
