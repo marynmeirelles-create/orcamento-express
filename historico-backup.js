@@ -34,7 +34,7 @@
   function ensureBackup(){if($("backupCard"))return;const p=$("panelDados");if(!p)return;const c=document.createElement("div");c.className="dados-card";c.id="backupCard";c.innerHTML=`<div class="sec-title">Backup dos dados</div><div class="backup-box"><p><strong>Onde o app guarda seus dados.</strong> Orçamentos, catálogo, logomarca e dados do ateliê ficam na área de armazenamento do Orçamento Express, no navegador e perfil usados neste aparelho. Você os encontra nas abas do app. O navegador guarda esses registros internamente.</p>
 <p><strong>Como guardar uma cópia.</strong> Use Salvar na minha nuvem e escolha uma pasta do Google Drive, iCloud Drive, OneDrive ou de outro serviço, se o aparelho mostrar essa opção. Cada backup é uma cópia daquele momento. Faça outro após alterações importantes.</p>
 <p><strong>Onde encontrar o arquivo.</strong> Se você usar Baixar no aparelho, procure por <strong>orcamento-express-backup-…json</strong> na pasta Downloads do navegador ou no app Arquivos. Depois mova uma cópia para a sua nuvem. Se escolher uma pasta diretamente, procure nela.</p>
-<p><strong>Como recuperar.</strong> Se trocar de aparelho ou apagar os dados do site, abra o Orçamento Express, entre e, em Dados → Backup dos dados, selecione o arquivo JSON e toque em Restaurar backup. A restauração substitui os dados locais atuais.</p></div><div class="fgroup" style="margin-top:12px"><p class="backup-small">O lembrete com os botões de backup aparece sempre que você salva um orçamento, inclusive ao editar. Os avisos abaixo são adicionais.</p><label class="lbl">Avisos adicionais ao abrir o app</label><select id="backupPeriodo"><option value="0">Somente ao salvar orçamento</option><option value="novo">Somente ao salvar orçamento (configuração anterior)</option><option value="3">A cada 3 dias</option><option value="7">A cada 7 dias</option><option value="14">A cada 14 dias</option><option value="30">A cada 30 dias</option></select></div><div class="backup-actions"><button type="button" id="btnBackup">Baixar no aparelho</button><button type="button" id="btnBackupCloud">Salvar na minha nuvem</button><button type="button" id="btnMarcarBackup">Marcar como feito</button><input type="file" id="backupArquivo" accept="application/json"><button type="button" id="btnRestaurarBackup">Restaurar backup</button><button type="button" id="btnLimparHistorico">Limpar histórico</button></div><p class="backup-small" id="backupStatus"></p>`;p.insertBefore(c,p.querySelector(".senha-card"));const sv=localStorage.getItem(K.backupDias)||"0";$("backupPeriodo").value=["0","novo","3","7","14","30"].includes(sv)?sv:"7";$("backupPeriodo").onchange=()=>{localStorage.setItem(K.backupDias,$("backupPeriodo").value);backupStatus();};$("btnBackup").onclick=downloadBackup;$("btnBackupCloud").onclick=saveBackupToCloud;$("btnMarcarBackup").onclick=()=>{localStorage.setItem(K.backupUltimo,new Date().toISOString());backupStatus();alert("Backup marcado como feito.");};$("btnRestaurarBackup").onclick=restoreBackup;$("btnLimparHistorico").onclick=clearHistory;backupStatus();}
+<p><strong>Como recuperar.</strong> Se trocar de aparelho ou apagar os dados do site, abra o Orçamento Express, entre e, em Dados → Backup dos dados, selecione o arquivo JSON e toque em Restaurar backup. A restauração substitui os dados locais atuais.</p></div><div class="fgroup" style="margin-top:12px"><p class="backup-small">O lembrete com os botões de backup aparece sempre que você salva um orçamento, inclusive ao editar. Os avisos abaixo são adicionais.</p><label class="lbl">Avisos adicionais ao abrir o app</label><select id="backupPeriodo"><option value="0">Somente ao salvar orçamento</option><option value="novo">Somente ao salvar orçamento (configuração anterior)</option><option value="3">A cada 3 dias</option><option value="7">A cada 7 dias</option><option value="14">A cada 14 dias</option><option value="30">A cada 30 dias</option></select></div><div class="backup-actions"><button type="button" id="btnBackup">Baixar no aparelho</button><button type="button" id="btnBackupCloud">Salvar na minha nuvem</button><button type="button" id="btnMarcarBackup">Marcar como feito</button><input type="file" id="backupArquivo" accept="application/json"><button type="button" id="btnRestaurarBackup">Restaurar backup</button><button type="button" id="btnLimparHistorico">Limpar histórico</button></div><p class="backup-small" id="backupStatus"></p>`;p.insertBefore(c,p.querySelector(".senha-card"));const sv=localStorage.getItem(K.backupDias)||"0";$("backupPeriodo").value=["0","novo","3","7","14","30"].includes(sv)?sv:"7";$("backupPeriodo").onchange=()=>{localStorage.setItem(K.backupDias,$("backupPeriodo").value);backupStatus();};$("btnBackup").onclick=downloadBackup;$("btnBackupCloud").onclick=()=>saveBackupToCloud();$("btnMarcarBackup").onclick=()=>{localStorage.setItem(K.backupUltimo,new Date().toISOString());backupStatus();alert("Backup marcado como feito.");};$("btnRestaurarBackup").onclick=restoreBackup;$("btnLimparHistorico").onclick=clearHistory;backupStatus();}
   function backupStatus(){const o=$("backupStatus");if(!o)return;const v=localStorage.getItem(K.backupDias)||"0",last=localStorage.getItem(K.backupUltimo);o.textContent=last?`Último backup: ${dataBR(last)}${v==="novo"?" - lembrete a cada orçamento salvo":Number(v)?` - alerta a cada ${v} dias`:""}`:(v==="novo"?"Lembrete ativo a cada orçamento salvo.":Number(v)?`Alerta configurado a cada ${v} dias. Nenhum backup registrado ainda.`:"Lembrete ativo a cada orçamento salvo.");}
   function checkBackup(){const v=localStorage.getItem(K.backupDias)||"0";if(!Number(v))return;const last=localStorage.getItem(K.backupUltimo),due=!last||(Date.now()-new Date(last).getTime())/86400000>=Number(v);if(due&&sessionStorage.getItem("orc_backup_alertado")!=="1"){sessionStorage.setItem("orc_backup_alertado","1");setTimeout(()=>alert("Lembrete: faça backup do Orçamento Express para proteger seus dados, produtos, logomarca e orçamentos salvos."),800);}}
   function backupFile() {
@@ -58,19 +58,11 @@
     dialog.setAttribute("aria-labelledby", "savedBackupTitle");
     dialog.style.cssText = "width:min(92vw,420px);margin:auto;padding:20px;border:1px solid #F2EAF8;border-radius:16px;color:#5d527c";
     dialog.innerHTML = '<h2 id="savedBackupTitle">Orçamento salvo!</h2>' +
-      '<p>Guarde uma cópia atualizada na sua nuvem para recuperar seus dados se trocar ou perder o celular.</p>' +
+      '<p>Guarde uma cópia atualizada na sua nuvem para recuperar seus dados se trocar ou perder o celular.</p><p role="status"></p>' +
       '<div class="backup-actions"><button type="button" data-cloud>Salvar na minha nuvem</button>' +
       '<button type="button" data-download>Baixar no aparelho</button>' +
       '<button type="button" data-later>Agora não</button></div>';
-    dialog.querySelector("[data-cloud]").onclick = () => {
-      dialog.close();
-      saveBackupToCloud();
-    };
-    dialog.querySelector("[data-download]").onclick = () => {
-      dialog.close();
-      downloadBackup();
-    };
-    dialog.querySelector("[data-later]").onclick = () => dialog.close();
+    connectBackupDialog(dialog);
     dialog.addEventListener("close", () => dialog.remove());
     document.body.append(dialog);
     dialog.showModal();
@@ -86,19 +78,16 @@
       link.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
       markBackup();
+      return true;
     } catch {
       alert("Não foi possível gerar a cópia. Confira os dados do app e tente novamente.");
     }
   }
 
-  async function saveBackupToCloud() {
+  async function saveBackupToCloud(report = alert) {
     try {
       const file = backupFile();
-      if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file] });
-        return;
-      }
-      if (window.showSaveFilePicker) {
+      if (typeof window.showSaveFilePicker === "function") {
         const handle = await window.showSaveFilePicker({
           suggestedName: file.name,
           types: [{ description: "Backup do Orçamento Express", accept: { "application/json": [".json"] } }]
@@ -107,16 +96,58 @@
         await writer.write(file);
         await writer.close();
         markBackup();
+        report("Arquivo salvo no destino escolhido.");
         return;
       }
-      alert("Este navegador não oferece seleção de destino. Use Baixar no aparelho e mova o arquivo da pasta Downloads para a sua nuvem.");
+      if (typeof navigator.share === "function" && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file] });
+        report("Confira se o arquivo apareceu na pasta escolhida na sua nuvem.");
+        return;
+      }
+      report("Este navegador não abriu um destino na nuvem. Toque em Baixar no aparelho e envie o arquivo de Downloads para a sua nuvem.");
     } catch (error) {
-      if (error.name !== "AbortError") alert("Não foi possível salvar no destino escolhido. Use Baixar no aparelho e mova o arquivo para a sua nuvem.");
+      if (error.name !== "AbortError") report("Não foi possível salvar nesse destino. Toque em Baixar no aparelho e envie o arquivo de Downloads para a sua nuvem.");
     }
   }
 
+  function connectBackupDialog(dialog) {
+    const cloud = dialog.querySelector("[data-cloud]");
+    const status = dialog.querySelector('[role="status"]');
+    const share = createBackupShareButton(message => { status.textContent = message; });
+    if (share) cloud.after(share);
+    cloud.onclick = async () => {
+      cloud.disabled = true;
+      status.textContent = "";
+      try { await saveBackupToCloud(message => { status.textContent = message; }); }
+      finally { cloud.disabled = false; }
+    };
+    dialog.querySelector("[data-download]").onclick = () => {
+      if (downloadBackup()) status.textContent = "Procure o arquivo em Downloads e envie uma cópia para a sua nuvem.";
+    };
+    dialog.querySelector("[data-later]").onclick = () => dialog.close();
+  }
+
+  function createBackupShareButton(report) {
+    if (typeof navigator.share !== "function") return null;
+    const sample = new File(["{}"], "backup.json", { type: "application/json" });
+    if (!navigator.canShare?.({ files: [sample] })) return null;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = "Compartilhar arquivo de backup";
+    button.onclick = async () => {
+      button.disabled = true;
+      try {
+        await navigator.share({ files: [backupFile()] });
+        report("Confira se o arquivo apareceu na pasta escolhida na sua nuvem.");
+      } catch (error) {
+        if (error.name !== "AbortError") report("O compartilhamento falhou. Você pode baixar o arquivo e enviá-lo à sua nuvem pelo app Arquivos.");
+      } finally { button.disabled = false; }
+    };
+    return button;
+  }
+
   function showStorageIntro() {
-    const key = "orc_aviso_armazenamento_v1";
+    const key = "orc_aviso_armazenamento_v2";
     if (localStorage.getItem(key)) return;
     const dialog = document.createElement("dialog");
     dialog.id = "storageIntro";
@@ -124,15 +155,10 @@
     dialog.style.cssText = "width:min(92vw,420px);margin:auto;padding:20px;border:1px solid #F2EAF8;border-radius:16px;color:#5d527c";
     dialog.innerHTML = '<h2 id="storageIntroTitle">Onde ficam seus orçamentos</h2>' +
       '<p>Este app guarda seus dados no navegador deste aparelho, sem sincronização automática. Se você apagar os dados do site, usar outro navegador ou perder o aparelho, precisará de uma cópia para recuperar os registros.</p>' +
-      '<p>Escolha onde guardar o arquivo de backup na sua própria nuvem. Você pode fazer isso depois em Dados → Backup dos dados.</p>' +
-      '<div class="backup-actions"><button type="button" data-backup>Escolher onde salvar</button><button type="button" data-later>Agora não</button></div>';
-    const close = () => dialog.close();
-    dialog.querySelector("[data-backup]").onclick = () => {
-      close();
-      setTabByName("dados");
-      saveBackupToCloud();
-    };
-    dialog.querySelector("[data-later]").onclick = close;
+      '<p>Use as opções abaixo para guardar uma cópia. Depois de cadastrar seus dados, faça um novo backup.</p><p role="status"></p>' +
+      '<div class="backup-actions"><button type="button" data-cloud>Salvar na minha nuvem</button>' +
+      '<button type="button" data-download>Baixar no aparelho</button><button type="button" data-later>Fechar</button></div>';
+    connectBackupDialog(dialog);
     dialog.addEventListener("close", () => {
       try { localStorage.setItem(key, "1"); } finally { dialog.remove(); }
     });
@@ -306,8 +332,15 @@
 
   function hooks() {
     $("btnSalvarProduto")?.addEventListener("click", renderProducts);
-    $("btnBackupSalvo").onclick = saveBackupToCloud;
+    $("btnBackupSalvo").onclick = () => saveBackupToCloud();
     $("btnBackupDownloadSalvo").onclick = downloadBackup;
+    for (const id of ["btnBackupCloud", "btnBackupSalvo"]) {
+      const share = createBackupShareButton(alert);
+      if (share) {
+        share.className = "btn-light";
+        $(id).after(share);
+      }
+    }
     $("btnTransferir").onclick = () => { if (ultimoOrcamento?.registro) transfer(ultimoOrcamento.registro); };
   }
   window.OrcamentoHistorico = { writeBudget, renderHistory, showSavedBackupReminder };
