@@ -31,11 +31,90 @@
   function copyPix(){const t=pixText();if(!t){alert("Preencha a chave Pix primeiro.");return;}navigator.clipboard.writeText(t).then(()=>alert("Pix copiado."));}
   function sendPix(){const t=pixText();if(!t){alert("Preencha a chave Pix primeiro.");return;}const w=String($("dWpp")?.value||"").replace(/\D/g,"");window.open(`https://wa.me/${w}?text=${encodeURIComponent(t)}`,"_blank");}
 
-  function ensureBackup(){if($("backupCard"))return;const p=$("panelDados");if(!p)return;const c=document.createElement("div");c.className="dados-card";c.id="backupCard";c.innerHTML=`<div class="sec-title">Backup dos dados</div><div class="backup-box"><p><strong>Onde os dados ficam salvos:</strong> seus dados, produtos, logomarca e orçamentos ficam guardados no navegador deste aparelho.</p><p><strong>Por que fazer backup:</strong> se limpar os dados do navegador, trocar de celular, desinstalar o app ou reinstalar, essas informações podem sumir. O backup cria um arquivo para restaurar tudo depois.</p><ul><li>Para fazer backup, toque em <strong>Baixar backup</strong> e guarde o arquivo em local seguro.</li><li>Para restaurar, instale/abra o app, entre com a senha, escolha o arquivo em <strong>Restaurar backup</strong> e confirme.</li><li>Depois de restaurar, feche e abra o app novamente.</li></ul></div><div class="fgroup" style="margin-top:12px"><label class="lbl">Lembrete de backup</label><select id="backupPeriodo"><option value="0">Sem alerta</option><option value="novo">A cada novo orçamento cadastrado</option><option value="3">A cada 3 dias</option><option value="7">A cada 7 dias</option><option value="14">A cada 14 dias</option><option value="30">A cada 30 dias</option></select></div><div class="backup-actions"><button type="button" id="btnBackup">Baixar backup</button><button type="button" id="btnMarcarBackup">Marcar como feito</button><input type="file" id="backupArquivo" accept="application/json"><button type="button" id="btnRestaurarBackup">Restaurar backup</button><button type="button" id="btnLimparHistorico">Limpar histórico</button></div><p class="backup-small" id="backupStatus"></p>`;p.insertBefore(c,p.querySelector(".senha-card"));const sv=localStorage.getItem(K.backupDias)||"0";$("backupPeriodo").value=["0","novo","3","7","14","30"].includes(sv)?sv:"7";$("backupPeriodo").onchange=()=>{localStorage.setItem(K.backupDias,$("backupPeriodo").value);backupStatus();};$("btnBackup").onclick=downloadBackup;$("btnMarcarBackup").onclick=()=>{localStorage.setItem(K.backupUltimo,new Date().toISOString());backupStatus();alert("Backup marcado como feito.");};$("btnRestaurarBackup").onclick=restoreBackup;$("btnLimparHistorico").onclick=clearHistory;backupStatus();}
+  function ensureBackup(){if($("backupCard"))return;const p=$("panelDados");if(!p)return;const c=document.createElement("div");c.className="dados-card";c.id="backupCard";c.innerHTML=`<div class="sec-title">Backup dos dados</div><div class="backup-box"><p><strong>Onde o app guarda seus dados.</strong> Orçamentos, catálogo, logomarca e dados do ateliê ficam na área de armazenamento do Orçamento Express, no navegador e perfil usados neste aparelho. Você os encontra nas abas do app. O navegador guarda esses registros internamente.</p>
+<p><strong>Como guardar uma cópia.</strong> Use Salvar na minha nuvem e escolha uma pasta do Google Drive, iCloud Drive, OneDrive ou de outro serviço, se o aparelho mostrar essa opção. Cada backup é uma cópia daquele momento. Faça outro após alterações importantes.</p>
+<p><strong>Onde encontrar o arquivo.</strong> Se você usar Baixar no aparelho, procure por <strong>orcamento-express-backup-…json</strong> na pasta Downloads do navegador ou no app Arquivos. Depois mova uma cópia para a sua nuvem. Se escolher uma pasta diretamente, procure nela.</p>
+<p><strong>Como recuperar.</strong> Se trocar de aparelho ou apagar os dados do site, abra o Orçamento Express, entre e, em Dados → Backup dos dados, selecione o arquivo JSON e toque em Restaurar backup. A restauração substitui os dados locais atuais.</p></div><div class="fgroup" style="margin-top:12px"><label class="lbl">Lembrete de backup</label><select id="backupPeriodo"><option value="0">Sem alerta</option><option value="novo">A cada novo orçamento cadastrado</option><option value="3">A cada 3 dias</option><option value="7">A cada 7 dias</option><option value="14">A cada 14 dias</option><option value="30">A cada 30 dias</option></select></div><div class="backup-actions"><button type="button" id="btnBackup">Baixar no aparelho</button><button type="button" id="btnBackupCloud">Salvar na minha nuvem</button><button type="button" id="btnMarcarBackup">Marcar como feito</button><input type="file" id="backupArquivo" accept="application/json"><button type="button" id="btnRestaurarBackup">Restaurar backup</button><button type="button" id="btnLimparHistorico">Limpar histórico</button></div><p class="backup-small" id="backupStatus"></p>`;p.insertBefore(c,p.querySelector(".senha-card"));const sv=localStorage.getItem(K.backupDias)||"0";$("backupPeriodo").value=["0","novo","3","7","14","30"].includes(sv)?sv:"7";$("backupPeriodo").onchange=()=>{localStorage.setItem(K.backupDias,$("backupPeriodo").value);backupStatus();};$("btnBackup").onclick=downloadBackup;$("btnBackupCloud").onclick=saveBackupToCloud;$("btnMarcarBackup").onclick=()=>{localStorage.setItem(K.backupUltimo,new Date().toISOString());backupStatus();alert("Backup marcado como feito.");};$("btnRestaurarBackup").onclick=restoreBackup;$("btnLimparHistorico").onclick=clearHistory;backupStatus();}
   function backupStatus(){const o=$("backupStatus");if(!o)return;const v=localStorage.getItem(K.backupDias)||"0",last=localStorage.getItem(K.backupUltimo);o.textContent=last?`Último backup: ${dataBR(last)}${v==="novo"?" - alerta a cada novo orçamento":Number(v)?` - alerta a cada ${v} dias`:""}`:(v==="novo"?"Alerta configurado a cada novo orçamento cadastrado.":Number(v)?`Alerta configurado a cada ${v} dias. Nenhum backup registrado ainda.`:"Nenhum alerta de backup configurado.");}
   function checkBackup(){const v=localStorage.getItem(K.backupDias)||"0";if(!Number(v))return;const last=localStorage.getItem(K.backupUltimo),due=!last||(Date.now()-new Date(last).getTime())/86400000>=Number(v);if(due&&sessionStorage.getItem("orc_backup_alertado")!=="1"){sessionStorage.setItem("orc_backup_alertado","1");setTimeout(()=>alert("Lembrete: faça backup do Orçamento Express para proteger seus dados, produtos, logomarca e orçamentos salvos."),800);}}
-  function downloadBackup(){const b={versao:1,criadoEm:new Date().toISOString(),dados:json(K.dados,{}),logo:localStorage.getItem(K.logo)||"",produtos:json(K.produtos,[]),orcamentos:json(K.orcamentos,[]),senha:localStorage.getItem(K.senha)||""};const url=URL.createObjectURL(new Blob([JSON.stringify(b,null,2)],{type:"application/json"}));const a=document.createElement("a");a.href=url;a.download=`orcamento-express-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);localStorage.setItem(K.backupUltimo,new Date().toISOString());backupStatus();}
-  function restoreBackup(){const f=$("backupArquivo")?.files?.[0];if(!f){alert("Escolha o arquivo de backup primeiro.");return;}const r=new FileReader();r.onload=()=>{try{const b=JSON.parse(r.result);if(!confirm("Restaurar este backup? Os dados atuais serão substituídos."))return;save(K.dados,b.dados||{});save(K.produtos,b.produtos||[]);save(K.orcamentos,b.orcamentos||[]);b.logo?localStorage.setItem(K.logo,b.logo):localStorage.removeItem(K.logo);if(b.senha)localStorage.setItem(K.senha,b.senha);alert("Backup restaurado. Feche e abra o app novamente para atualizar tudo.");}catch{alert("Arquivo de backup inválido.");}};r.readAsText(f);}
+  function backupFile() {
+    const now = new Date().toISOString();
+    const data = {
+      versao: 1, criadoEm: now, dados: json(K.dados, {}), logo: localStorage.getItem(K.logo) || "",
+      produtos: json(K.produtos, []), orcamentos: readHistory()
+    };
+    return new File([JSON.stringify(data, null, 2)], "orcamento-express-backup-" + now.slice(0, 10) + ".json", { type: "application/json" });
+  }
+
+  function markBackup() {
+    localStorage.setItem(K.backupUltimo, new Date().toISOString());
+    backupStatus();
+  }
+
+  function downloadBackup() {
+    try {
+      const file = backupFile();
+      const url = URL.createObjectURL(file);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = file.name;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      markBackup();
+    } catch {
+      alert("Não foi possível gerar a cópia. Confira os dados do app e tente novamente.");
+    }
+  }
+
+  async function saveBackupToCloud() {
+    try {
+      const file = backupFile();
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file] });
+        return;
+      }
+      if (window.showSaveFilePicker) {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: file.name,
+          types: [{ description: "Backup do Orçamento Express", accept: { "application/json": [".json"] } }]
+        });
+        const writer = await handle.createWritable();
+        await writer.write(file);
+        await writer.close();
+        markBackup();
+        return;
+      }
+      alert("Este navegador não oferece seleção de destino. Use Baixar no aparelho e mova o arquivo da pasta Downloads para a sua nuvem.");
+    } catch (error) {
+      if (error.name !== "AbortError") alert("Não foi possível salvar no destino escolhido. Use Baixar no aparelho e mova o arquivo para a sua nuvem.");
+    }
+  }
+
+  function showStorageIntro() {
+    const key = "orc_aviso_armazenamento_v1";
+    if (localStorage.getItem(key)) return;
+    const dialog = document.createElement("dialog");
+    dialog.id = "storageIntro";
+    dialog.setAttribute("aria-labelledby", "storageIntroTitle");
+    dialog.style.cssText = "width:min(92vw,420px);margin:auto;padding:20px;border:1px solid #F2EAF8;border-radius:16px;color:#5d527c";
+    dialog.innerHTML = '<h2 id="storageIntroTitle">Onde ficam seus orçamentos</h2>' +
+      '<p>Este app guarda seus dados no navegador deste aparelho, sem sincronização automática. Se você apagar os dados do site, usar outro navegador ou perder o aparelho, precisará de uma cópia para recuperar os registros.</p>' +
+      '<p>Escolha onde guardar o arquivo de backup na sua própria nuvem. Você pode fazer isso depois em Dados → Backup dos dados.</p>' +
+      '<div class="backup-actions"><button type="button" data-backup>Escolher onde salvar</button><button type="button" data-later>Agora não</button></div>';
+    const close = () => dialog.close();
+    dialog.querySelector("[data-backup]").onclick = () => {
+      close();
+      setTabByName("dados");
+      saveBackupToCloud();
+    };
+    dialog.querySelector("[data-later]").onclick = close;
+    dialog.addEventListener("close", () => {
+      try { localStorage.setItem(key, "1"); } finally { dialog.remove(); }
+    });
+    document.body.append(dialog);
+    dialog.showModal();
+  }
+  function restoreBackup(){const f=$("backupArquivo")?.files?.[0];if(!f){alert("Escolha o arquivo de backup primeiro.");return;}const r=new FileReader();r.onload=()=>{try{const b=JSON.parse(r.result);if(b?.versao!==1||!Array.isArray(b.produtos)||!Array.isArray(b.orcamentos)||!b.dados||typeof b.dados!=="object"||Array.isArray(b.dados))throw Error("Backup inválido");if(!confirm("Restaurar este backup? Os dados atuais serão substituídos."))return;save(K.dados,b.dados||{});save(K.produtos,b.produtos||[]);save(K.orcamentos,b.orcamentos||[]);b.logo?localStorage.setItem(K.logo,b.logo):localStorage.removeItem(K.logo);if(b.senha)localStorage.setItem(K.senha,b.senha);alert("Backup restaurado. Feche e abra o app novamente para atualizar tudo.");}catch{alert("Arquivo de backup inválido.");}};r.readAsText(f);}
 
   const statuses = ["Rascunho", "Enviado", "Aprovado", "Recusado", "Cancelado"];
   const searchKey = value => String(value || "").normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().trim();
@@ -57,6 +136,7 @@
       nome: match[1], qtd: Number(match[2]), valorUnit: pv(match[3])
     }));
     return {
+      nomePersonalizado: line("*Nome para personalizar:*"), idadePersonalizada: line("*Idade para personalizar:*"),
       cliente: record.cliente, telefone: record.clienteWpp, tema: record.tema || line("*Tema:*"),
       dataFesta: date(line("*Data da festa:*")), dataEntrega: date(line("*Entrega:*")),
       validade: date(line("*Válido até:*")),
@@ -121,7 +201,7 @@
       cliente: form.cliente, telefone: form.telefone || "", tema: form.tema || "",
       dataFesta: form.dataFesta || "", dataEntrega: form.dataEntrega || "",
       entrega: form.tipoFrete || "", frete: Number(form.freteValor) || 0,
-      observacoes: [form.obs, form.transpNome ? "Transportadora: " + form.transpNome : ""].filter(Boolean).join("\n"),
+      observacoes: [form.nomePersonalizado ? "Nome para personalizar: " + form.nomePersonalizado : "", form.idadePersonalizada ? "Idade para personalizar: " + form.idadePersonalizada : "", form.obs, form.transpNome ? "Transportadora: " + form.transpNome : ""].filter(Boolean).join("\n"),
       itens: form.itens.map(item => ({ nome: item.nome, quantidade: item.qtd, preco: item.valorUnit }))
     };
     const destination = "https://pedidoemdia.mundodasideias.online/#importar-orcamento";
@@ -201,10 +281,10 @@
 
   function hooks() {
     $("btnSalvarProduto")?.addEventListener("click", renderProducts);
-    $("btnBackupSalvo").onclick = downloadBackup;
+    $("btnBackupSalvo").onclick = () => { document.querySelector('.tab[data-tab="dados"]').click(); $("backupCard").scrollIntoView(); };
     $("btnTransferir").onclick = () => { if (ultimoOrcamento?.registro) transfer(ultimoOrcamento.registro); };
   }
   window.OrcamentoHistorico = { writeBudget, renderHistory };
-  function init(){style();ensureProductsTab();ensureHistoryTab();ensurePix();ensureBackup();hooks();renderHistory();checkBackup();setupTabMemory();}
+  function init(){style();ensureProductsTab();ensureHistoryTab();ensurePix();ensureBackup();hooks();renderHistory();checkBackup();setupTabMemory();showStorageIntro();}
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
