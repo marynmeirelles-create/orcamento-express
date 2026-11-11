@@ -1,6 +1,5 @@
 (() => {
   const K={dados:"orc_dados",logo:"orc_logo",produtos:"orc_produtos",orcamentos:"orc_orcamentos",backupDias:"orc_backup_dias",backupUltimo:"orc_backup_ultimo",senha:"orc_senha",aba:"orc_aba_ativa"};
-  const CATS=["Aguardando aprovação","Aprovado","Não aprovado","Ajustes solicitados","Cancelado"];
   const $=id=>document.getElementById(id);
   const json=(k,f)=>{try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(f));}catch{return f;}};
   const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
@@ -9,8 +8,6 @@
   const esc=v=>String(v||"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
   const dataBR=iso=>iso?new Date(iso).toLocaleString("pt-BR"):"";
   const cleanPix=t=>String(t||"").replace(/\n💸 \*Pix:\*/g,"\n*Pix:*").replace(/\n💸 Pix:/g,"\nPix:").replace(/💸 \*Pix:\*/g,"*Pix:*").replace(/💸 Pix:/g,"Pix:");
-  const categoria=o=>CATS.includes(o?.categoria)?o.categoria:"Aguardando aprovação";
-  const catOptions=sel=>CATS.map(c=>`<option value="${esc(c)}" ${c===sel?"selected":""}>${esc(c)}</option>`).join("");
 
   function style(){const s=document.createElement("style");s.textContent=`
     #panelProdutos #prodList{display:none!important}.hist-list,.prod-list{display:flex;flex-direction:column;gap:10px;margin-top:10px}.hist-card,.prod-row,.prod-picker,.backup-box{background:#FFF9FC;border:1px solid #F2EAF8;border-radius:16px;padding:12px}.hist-card{box-shadow:0 5px 14px rgba(0,0,0,.04)}.hist-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.hist-title{font-size:13px;font-weight:800;color:#7a3a6b}.hist-meta,.hist-text,.backup-small,.backup-box p,.backup-box li{font-size:11px;color:#7a6c9f;line-height:1.55}.hist-total{font-size:12px;font-weight:800;color:#8C7BFF;white-space:nowrap}.hist-cat{margin-top:8px;display:grid;gap:5px}.hist-cat label,.hist-edit label{font-size:10px;font-weight:800;color:#7a3a6b}.hist-cat select,.hist-edit input,.hist-edit select,.hist-edit textarea{width:100%;box-sizing:border-box;border:1px solid #F2EAF8;border-radius:12px;padding:10px;background:#fff;color:#5d527c;font-family:'Poppins',sans-serif;font-size:12px}.hist-edit textarea{min-height:170px;resize:vertical;line-height:1.5}.hist-edit{display:none;margin-top:10px;background:#fff;border-radius:14px;padding:10px;border:1px solid #F2EAF8}.hist-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.hist-edit-grid .full{grid-column:1/-1}.hist-item-list{display:flex;flex-direction:column;gap:8px;margin-top:6px}.hist-item-row{display:grid;grid-template-columns:1fr 58px 76px 32px;gap:6px;align-items:end;background:#FFF9FC;border:1px solid #F2EAF8;border-radius:14px;padding:8px}.hist-item-row .prod{grid-column:1/-1}.hist-item-row .del{min-height:34px;padding:6px;border-radius:50%;background:#FFE4E4;color:#c73232}.hist-text{white-space:pre-wrap;background:#fff;border-radius:12px;padding:10px;margin-top:8px;display:none}.hist-actions,.backup-actions,.pix-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.prod-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.hist-actions button,.backup-actions button,.prod-picker button,.prod-actions button,.pix-actions button,.hist-edit button{border:none;border-radius:999px;padding:10px 14px;font-size:11px;font-weight:700;cursor:pointer;background:#F0EDFF;color:#8C7BFF;font-family:'Poppins',sans-serif;min-height:38px;line-height:1.2}.prod-actions button{white-space:nowrap;width:auto;min-width:max-content}.hist-actions button,.backup-actions button,.pix-actions button,.hist-edit button{white-space:normal}.hist-actions .danger,.prod-actions .danger{background:#FFE4E4;color:#c73232}.hist-actions .ok,.hist-edit .ok{background:#E9F8EF;color:#2d8a4e}.hist-edit-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.hist-empty{font-size:12px;color:#a08fc7;text-align:center;background:#FFF9FC;border-radius:14px;padding:16px}.backup-box ul{padding-left:18px;margin:8px 0}.backup-actions input[type=file]{grid-column:1/-1;border-radius:14px;font-size:12px;background:#fff}.prod-picker{margin:8px 0 12px}.prod-picker-title{font-size:12px;font-weight:800;color:#7a3a6b;margin-bottom:8px}.prod-picker-grid{display:grid;grid-template-columns:1fr 76px;gap:8px;align-items:end}.prod-picker button{grid-column:1/-1;padding:11px;font-size:12px}.prod-picker .hint{grid-column:1/-1;margin-top:2px}.prod-row{display:block;font-size:12px;color:#7a6c9f}.prod-row strong{color:#7a3a6b}.prod-search{margin-bottom:10px}.pix-actions{margin-top:-4px;margin-bottom:12px}@media(max-width:420px){.hist-edit-grid{grid-template-columns:1fr}.hist-actions{grid-template-columns:1fr 1fr}.hist-item-row{grid-template-columns:1fr 1fr 32px}.hist-item-row .prod{grid-column:1/-1}.prod-actions button{font-size:10px;padding-left:12px;padding-right:12px}}
@@ -24,14 +21,10 @@
 
   function ensureProductsTab(){const p=tab("Produtos","Produtos",'[data-tab="dados"]');if(!p)return;const old=$("btnSalvarProduto")?.closest(".dados-card");p.innerHTML=`<div class="dados-card"><div class="sec-title">Produtos cadastrados</div><div class="fgroup prod-search"><label class="lbl">Buscar produto</label><input type="text" id="prodBusca" placeholder="Digite para buscar"></div><div id="prodCadastroSlot"></div><div class="prod-list" id="produtosTabList"></div></div>`;if(old){$("prodCadastroSlot").appendChild(old);const oldList=$("prodList");if(oldList)oldList.style.display="none";}$("prodBusca").oninput=renderProducts;renderProducts();}
   function ensureHistoryTab(){const p=tab("Historico","Histórico",'[data-tab="dados"]');if(!p)return;p.innerHTML=`<div class="fcard"><div class="sec-title">Catálogo de orçamentos</div><div class="fgroup"><label class="lbl">Buscar por cliente, tema, categoria ou item</label><input type="text" id="histBusca" placeholder="Digite para buscar"></div><div class="hist-list" id="histList"></div></div>`;$("histBusca").oninput=renderHistory;}
-  function ensurePicker(){if($("prodPicker"))return;const list=$("iList");if(!list)return;const b=document.createElement("div");b.id="prodPicker";b.className="prod-picker";b.innerHTML=`<div class="prod-picker-title">Inserir produto cadastrado</div><div class="prod-picker-grid"><div><label class="mini-label">Produto salvo</label><select id="prodEscolhido"></select></div><div><label class="mini-label">Qtd.</label><input type="number" id="prodQtd" min="1" step="1" value="1"></div><button type="button" id="btnInserirProduto">Inserir no orçamento</button><p class="hint">Escolha um produto cadastrado ou comece a digitar no campo Produtos para autopreencher.</p></div>`;list.parentElement.insertBefore(b,list);$("btnInserirProduto").onclick=insertSelected;renderProductSelect(true);}
-  function renderProductSelect(blank=false){const s=$("prodEscolhido");if(!s)return;const ps=json(K.produtos,[]);s.innerHTML=`<option value="">Escolha um produto</option>`+ps.map((p,i)=>`<option value="${i}">${esc(p.nome)} - ${fmt(p.valor)}</option>`).join("");if(blank)s.value="";}
-  function renderProducts(){const box=$("produtosTabList");if(!box)return;const q=($("prodBusca")?.value||"").toLowerCase();const ps=json(K.produtos,[]).map((p,i)=>({...p,i})).filter(p=>!q||String(p.nome).toLowerCase().includes(q));renderProductSelect();if(!ps.length){box.innerHTML='<div class="hist-empty">Nenhum produto cadastrado ainda.</div>';return;}box.innerHTML="";ps.forEach(p=>{const r=document.createElement("div");r.className="prod-row";r.innerHTML=`<strong>${esc(p.nome)}</strong><br>${fmt(p.valor)}<div class="prod-actions"><button type="button" data-a="usar">Usar no orçamento</button><button type="button" class="danger" data-a="excluir">Excluir</button></div>`;r.querySelector('[data-a="usar"]').onclick=()=>useProduct(p.i);r.querySelector('[data-a="excluir"]').onclick=()=>deleteProduct(p.i);box.appendChild(r);});}
-  function deleteProduct(i){if(!confirm("Excluir este produto cadastrado?"))return;const ps=json(K.produtos,[]);ps.splice(i,1);save(K.produtos,ps);renderProducts();renderProductSelect(true);}
-  function useProduct(i){const p=json(K.produtos,[])[i];if(!p)return;insertProduct(p,1);setTabByName("form");if(location.hash!=="#form")history.pushState({aba:"form"},"","#form");resetPicker();}
-  function insertSelected(){const ps=json(K.produtos,[]),s=$("prodEscolhido"),p=ps[Number(s?.value)];if(!p){alert("Escolha um produto cadastrado primeiro.");return;}insertProduct(p,Math.max(1,parseInt($("prodQtd")?.value||"1")));resetPicker();}
+  function renderProducts(){const box=$("produtosTabList");if(!box)return;const q=($("prodBusca")?.value||"").toLowerCase();const ps=json(K.produtos,[]).map((p,i)=>({...p,i})).filter(p=>!q||String(p.nome).toLowerCase().includes(q));if(!ps.length){box.innerHTML='<div class="hist-empty">Nenhum produto cadastrado ainda.</div>';return;}box.innerHTML="";ps.forEach(p=>{const r=document.createElement("div");r.className="prod-row";r.innerHTML=`<strong>${esc(p.nome)}</strong><br>${fmt(p.valor)}<div class="prod-actions"><button type="button" data-a="usar">Usar no orçamento</button><button type="button" class="danger" data-a="excluir">Excluir</button></div>`;r.querySelector('[data-a="usar"]').onclick=()=>useProduct(p.i);r.querySelector('[data-a="excluir"]').onclick=()=>deleteProduct(p.i);box.appendChild(r);});}
+  function deleteProduct(i){if(!confirm("Excluir este produto cadastrado?"))return;const ps=json(K.produtos,[]);ps.splice(i,1);save(K.produtos,ps);atualizarProdutosUI();renderProducts();}
+  function useProduct(i){const p=json(K.produtos,[])[i];if(!p)return;insertProduct(p,1);setTabByName("form");if(location.hash!=="#form")history.pushState({aba:"form"},"","#form");}
   function insertProduct(p,qtd=1){$("btnAddItem")?.click();const rows=document.querySelectorAll("#iList .irow"),row=rows[rows.length-1],ins=row?.querySelectorAll("input");if(ins?.length>=3){ins[0].value=p.nome;ins[1].value=qtd;ins[2].value=p.valor||"";ins[2].dispatchEvent(new Event("input",{bubbles:true}));}}
-  function resetPicker(){if($("prodEscolhido"))$("prodEscolhido").value="";if($("prodQtd"))$("prodQtd").value="1";}
 
   function ensurePix(){if($("pixActions"))return;const pix=$("dPix");if(!pix)return;const b=document.createElement("div");b.id="pixActions";b.className="pix-actions";b.innerHTML=`<button type="button" id="btnCopiarPix">Copiar Pix</button><button type="button" id="btnWppPix">Enviar Pix no WhatsApp</button>`;pix.closest(".fgroup")?.insertAdjacentElement("afterend",b);$("btnCopiarPix").onclick=copyPix;$("btnWppPix").onclick=sendPix;}
   function pixText(){const d={tipo:$("dTipoPix")?.value||"Pix",pix:$("dPix")?.value.trim()||"",nome:$("dNomePix")?.value.trim()||"",atelie:$("dAtelie")?.value.trim()||""};if(!d.pix)return"";return`Chave Pix (${d.tipo}): ${d.pix}${d.nome?`\nNome: ${d.nome}`:""}${d.atelie?`\n${d.atelie}`:""}`;}
@@ -44,22 +37,174 @@
   function downloadBackup(){const b={versao:1,criadoEm:new Date().toISOString(),dados:json(K.dados,{}),logo:localStorage.getItem(K.logo)||"",produtos:json(K.produtos,[]),orcamentos:json(K.orcamentos,[]),senha:localStorage.getItem(K.senha)||""};const url=URL.createObjectURL(new Blob([JSON.stringify(b,null,2)],{type:"application/json"}));const a=document.createElement("a");a.href=url;a.download=`orcamento-express-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);localStorage.setItem(K.backupUltimo,new Date().toISOString());backupStatus();}
   function restoreBackup(){const f=$("backupArquivo")?.files?.[0];if(!f){alert("Escolha o arquivo de backup primeiro.");return;}const r=new FileReader();r.onload=()=>{try{const b=JSON.parse(r.result);if(!confirm("Restaurar este backup? Os dados atuais serão substituídos."))return;save(K.dados,b.dados||{});save(K.produtos,b.produtos||[]);save(K.orcamentos,b.orcamentos||[]);b.logo?localStorage.setItem(K.logo,b.logo):localStorage.removeItem(K.logo);if(b.senha)localStorage.setItem(K.senha,b.senha);alert("Backup restaurado. Feche e abra o app novamente para atualizar tudo.");}catch{alert("Arquivo de backup inválido.");}};r.readAsText(f);}
 
-  function saveBudget(status){let text=cleanPix(($("previaTexto")?.textContent||"").trim());if(!text||text.includes("Preencha o orçamento"))return;const pvEl=$("previaTexto");if(pvEl)pvEl.textContent=text;const item={id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),criadoEm:new Date().toISOString(),status,categoria:"Aguardando aprovação",cliente:($("fCliente")?.value||"Cliente sem nome").trim(),tema:($("fTema")?.value||"").trim(),totalTxt:($("fTotal")?.textContent||"").trim(),texto:text};const list=json(K.orcamentos,[]),old=list.find(o=>o.texto===item.texto);let isNew=false;if(old){old.status=status;old.atualizadoEm=new Date().toISOString();if(!old.categoria)old.categoria="Aguardando aprovação";}else{list.unshift(item);isNew=true;}save(K.orcamentos,list.slice(0,200));renderHistory();if(localStorage.getItem(K.backupDias)==="novo"&&isNew)setTimeout(()=>alert("Lembrete: um novo orçamento foi salvo. Faça backup para proteger seus dados."),300);resetPicker();}
-  function updateHistory(id,patch){const list=json(K.orcamentos,[]),i=list.findIndex(o=>o.id===id);if(i<0)return null;list[i]={...list[i],...patch,atualizadoEm:new Date().toISOString()};save(K.orcamentos,list);return list[i];}
-  function parseItems(text){const block=String(text||"").match(/\*Itens:\*\n([\s\S]*?)\n[─-]{5,}/);if(!block)return[];return block[1].split("\n").map(l=>l.trim()).map(l=>{const m=l.match(/^[•-]\s*(.*?)\s+[—-]\s+(\d+)\s*un\.\s*x\s*R\$\s*([\d.,]+)/i);return m?{nome:m[1].trim(),qtd:parseInt(m[2]||"1"),valor:pv(m[3])}:null;}).filter(Boolean);}
-  function addEditItem(box,item={nome:"",qtd:1,valor:""}){const r=document.createElement("div");r.className="hist-item-row";r.innerHTML=`<div class="prod"><label>Produto</label><input type="text" data-i="nome" value="${esc(item.nome)}" placeholder="Produto"></div><div><label>Qtd.</label><input type="number" data-i="qtd" min="1" step="1" value="${esc(item.qtd||1)}"></div><div><label>Valor</label><input type="number" data-i="valor" min="0" step="0.01" value="${item.valor!==""?esc(item.valor):""}" placeholder="R$"></div><button type="button" class="del" data-i="del">×</button>`;r.querySelector('[data-i="del"]').onclick=()=>r.remove();box.appendChild(r);}
-  function drawEditItems(box,items){box.innerHTML="";(items.length?items:[{nome:"",qtd:1,valor:""}]).forEach(i=>addEditItem(box,i));}
-  function readEditItems(box){return Array.from(box.querySelectorAll(".hist-item-row")).map(r=>({nome:r.querySelector('[data-i="nome"]').value.trim(),qtd:Math.max(1,parseInt(r.querySelector('[data-i="qtd"]').value||"1")),valor:pv(r.querySelector('[data-i="valor"]').value)})).filter(i=>i.nome);}
-  function applyEditedItems(text,items){if(!items.length)return{text,totalTxt:""};const subtotal=items.reduce((s,i)=>s+i.qtd*i.valor,0),frete=(String(text).match(/\*Frete:\*[^\n]*R\$\s*([\d.,]+)/)||[])[1],total=subtotal+(frete?pv(frete):0),linhas=items.map(i=>`• ${i.nome} — ${i.qtd} un. x ${fmt(i.valor)} = ${fmt(i.qtd*i.valor)}`).join("\n");let novo=String(text||"");novo=novo.replace(/(\*Itens:\*\n)[\s\S]*?(\n[─-]{5,}\n)/,`$1${linhas}$2`);novo=novo.replace(/🧾 \*Subtotal:\*[^\n]*/,`🧾 *Subtotal:* ${fmt(subtotal)}`);novo=novo.replace(/💰 \*Total:.*?\*/,`💰 *Total: ${fmt(total)}*`);return{text:novo,totalTxt:fmt(total)};}
-  function renderHistory(){const box=$("histList");if(!box)return;const q=($("histBusca")?.value||"").toLowerCase();const list=json(K.orcamentos,[]).filter(o=>!q||`${o.cliente} ${o.tema} ${o.texto} ${categoria(o)}`.toLowerCase().includes(q));if(!list.length){box.innerHTML='<div class="hist-empty">Nenhum orçamento salvo ainda.</div>';return;}box.innerHTML="";list.forEach(o=>{const cat=categoria(o);const card=document.createElement("div");card.className="hist-card";card.innerHTML=`<div class="hist-top"><div><div class="hist-title">${esc(o.cliente||"Cliente")}</div><div class="hist-meta">${esc(o.status||"Salvo")} - ${dataBR(o.criadoEm)}${o.tema?" - "+esc(o.tema):""}</div></div><div class="hist-total">${esc(o.totalTxt||"")}</div></div><div class="hist-cat"><label>Situação do orçamento</label><select data-a="categoria">${catOptions(cat)}</select></div><div class="hist-actions"><button type="button" data-a="ver">Ver texto</button><button type="button" data-a="editar">Editar</button><button type="button" data-a="copiar">Copiar</button><button type="button" data-a="whats">WhatsApp</button><button type="button" class="danger" data-a="excluir">Excluir</button></div><div class="hist-edit"><div class="hist-edit-grid"><div><label>Cliente</label><input type="text" data-e="cliente" value="${esc(o.cliente||"")}"></div><div><label>Tema</label><input type="text" data-e="tema" value="${esc(o.tema||"")}"></div><div><label>Valor total</label><input type="text" data-e="totalTxt" value="${esc(o.totalTxt||"")}"></div><div><label>Situação</label><select data-e="categoria">${catOptions(cat)}</select></div><div class="full"><label>Itens do orçamento</label><div class="hist-item-list" data-e="itens"></div><button type="button" data-a="add-item-edit">Adicionar item</button></div><div class="full"><label>Texto do orçamento</label><textarea data-e="texto">${esc(cleanPix(o.texto||""))}</textarea></div></div><div class="hist-edit-actions"><button type="button" class="ok" data-a="salvar-edicao">Salvar edição</button><button type="button" data-a="cancelar-edicao">Cancelar</button></div></div><div class="hist-text"></div>`;const t=card.querySelector(".hist-text"),edit=card.querySelector(".hist-edit"),itemsBox=card.querySelector('[data-e="itens"]');t.textContent=cleanPix(o.texto||"");drawEditItems(itemsBox,parseItems(o.texto));card.querySelector('[data-a="add-item-edit"]').onclick=()=>addEditItem(itemsBox);card.querySelector('[data-a="categoria"]').onchange=e=>updateHistory(o.id,{categoria:e.target.value});card.querySelector('[data-a="ver"]').onclick=()=>{t.style.display=t.style.display==="block"?"none":"block";};card.querySelector('[data-a="editar"]').onclick=()=>{edit.style.display=edit.style.display==="block"?"none":"block";t.style.display="none";};card.querySelector('[data-a="cancelar-edicao"]').onclick=()=>{edit.style.display="none";};card.querySelector('[data-a="salvar-edicao"]').onclick=()=>{const items=readEditItems(itemsBox),applied=applyEditedItems(cleanPix(card.querySelector('[data-e="texto"]').value.trim()),items),manualTotal=card.querySelector('[data-e="totalTxt"]').value.trim();const patch={cliente:card.querySelector('[data-e="cliente"]').value.trim()||"Cliente sem nome",tema:card.querySelector('[data-e="tema"]').value.trim(),totalTxt:applied.totalTxt||manualTotal,categoria:card.querySelector('[data-e="categoria"]').value,texto:applied.text};updateHistory(o.id,patch);alert("Orçamento atualizado no histórico.");renderHistory();};card.querySelector('[data-a="copiar"]').onclick=()=>navigator.clipboard.writeText(cleanPix(o.texto||"")).then(()=>alert("Orçamento copiado."));card.querySelector('[data-a="whats"]').onclick=()=>{const w=String(json(K.dados,{}).wpp||"").replace(/\D/g,"");window.open(`https://wa.me/${w}?text=${encodeURIComponent(cleanPix(o.texto||""))}`,"_blank");};card.querySelector('[data-a="excluir"]').onclick=()=>{if(confirm("Excluir este orçamento do histórico?")){save(K.orcamentos,json(K.orcamentos,[]).filter(x=>x.id!==o.id));renderHistory();}};box.appendChild(card);});}
+  const statuses = ["Rascunho", "Enviado", "Aprovado", "Recusado", "Cancelado"];
+  const searchKey = value => String(value || "").normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().trim();
+
+  function budgetStatus(record) {
+    if (statuses.includes(record.status)) return record.status;
+    const old = { Aprovado: "Aprovado", "Não aprovado": "Recusado", Cancelado: "Cancelado" };
+    return old[record.categoria] || (/^Enviado/i.test(record.status || "") ? "Enviado" : "Rascunho");
+  }
+
+  function legacyForm(record) {
+    const text = record.texto || "";
+    const line = label => text.split("\n").find(value => value.includes(label))?.split(label).slice(1).join(label).trim() || "";
+    const date = value => /^\d{2}\/\d{2}\/\d{4}$/.test(value) ? value.split("/").reverse().join("-") : "";
+    const freight = line("*Frete:*");
+    const payment = line("*Pagamento:*");
+    const type = ["Transportadora", "Correio", "Motoboy"].find(value => freight.startsWith(value)) || "Retirada";
+    const items = Array.from(text.matchAll(/^[•-] (.+) — (\d+) un\. x R\$\s*([\d.,]+) = /gm), match => ({
+      nome: match[1], qtd: Number(match[2]), valorUnit: pv(match[3])
+    }));
+    return {
+      cliente: record.cliente, telefone: record.clienteWpp, tema: record.tema || line("*Tema:*"),
+      dataFesta: date(line("*Data da festa:*")), dataEntrega: date(line("*Entrega:*")),
+      validade: date(line("*Válido até:*")),
+      obs: text.match(/\*Obs\.:\*\s*([\s\S]*?)(?=\n\n✨|$)/)?.[1].trim() || "",
+      forma: payment, parc: line("Parcelamento:"), taxa: pv(line("Taxa do cartão:")),
+      sinal: text.match(/Sinal \((\d+)%\)/)?.[1] || (text.includes("100% antecipado") ? "100" : "0"),
+      restante: line("💵 Restante").split(" — ").pop(),
+      tipoFrete: type, transpNome: freight.match(/^Transportadora \((.*?)\)/)?.[1] || "",
+      freteValor: pv(freight.match(/R\$\s*([\d.,]+)/)?.[1]), itens: items
+    };
+  }
+
+  function readHistory() {
+    const records = JSON.parse(localStorage.getItem(K.orcamentos) || "[]");
+    if (!Array.isArray(records)) throw new Error("Histórico inválido");
+    return records;
+  }
+
+  function writeBudget(form, text, total, id) {
+    try {
+      const records = readHistory();
+      const index = id ? records.findIndex(record => record.id === id) : -1;
+      if (id && index < 0) throw new Error("Orçamento excluído");
+      const previous = records[index];
+      const now = new Date().toISOString();
+      const record = {
+        ...previous, id: id || crypto.randomUUID(), criadoEm: previous?.criadoEm || now, atualizadoEm: now,
+        status: previous ? budgetStatus(previous) : "Rascunho",
+        cliente: form.cliente, clienteWpp: form.telefone, tema: form.tema, totalTxt: fmt(total),
+        texto: cleanPix(text), formulario: form
+      };
+      if (previous?.texto && !previous.formulario) record.textoOriginal = previous.texto;
+      if (previous) records[index] = record;
+      else records.unshift(record);
+      save(K.orcamentos, records);
+      return record;
+    } catch {
+      alert("Não foi possível gravar o orçamento. Os campos continuam preenchidos para você tentar novamente.");
+      return null;
+    }
+  }
+
+  function updateStatus(id, status) {
+    try {
+      const records = readHistory();
+      const record = records.find(entry => entry.id === id);
+      if (!record) throw new Error("Orçamento excluído");
+      record.status = status;
+      record.atualizadoEm = new Date().toISOString();
+      save(K.orcamentos, records);
+    } catch {
+      alert("Não foi possível atualizar o status.");
+    }
+    renderHistory();
+  }
+
+  function transfer(record) {
+    const form = record.formulario || legacyForm(record);
+    if (!form.itens.length) return alert("Abra o orçamento, confira os itens e salve antes de copiar.");
+    const payload = {
+      tipo: "orcamento-express", versao: 1,
+      cliente: form.cliente, telefone: form.telefone || "", tema: form.tema || "",
+      dataFesta: form.dataFesta || "", dataEntrega: form.dataEntrega || "",
+      entrega: form.tipoFrete || "", frete: Number(form.freteValor) || 0,
+      observacoes: [form.obs, form.transpNome ? "Transportadora: " + form.transpNome : ""].filter(Boolean).join("\n"),
+      itens: form.itens.map(item => ({ nome: item.nome, quantidade: item.qtd, preco: item.valorUnit }))
+    };
+    const destination = "https://pedidoemdia.mundodasideias.online/#importar-orcamento";
+    $("pedidoTransferText").value = JSON.stringify(payload);
+    const dialog = $("pedidoTransfer");
+    if (!dialog.open) dialog.showModal();
+    $("pedidoTransferLink").href = destination;
+    $("pedidoTransferStatus").textContent = "Copie o texto e cole em Importar orçamento no Pedido em Dia.";
+    $("pedidoTransferText").select();
+    navigator.clipboard?.writeText($("pedidoTransferText").value).then(() => {
+      $("pedidoTransferStatus").textContent = "Dados copiados. Abra o Pedido em Dia e cole em Importar orçamento.";
+    }).catch(() => {});
+  }
+
+  function renderHistory() {
+    const box = $("histList");
+    if (!box) return;
+    const query = searchKey($("histBusca")?.value);
+    const records = json(K.orcamentos, []).filter(record =>
+      [record.cliente, record.clienteWpp, record.tema, record.texto, record.categoria, budgetStatus(record)]
+        .some(value => searchKey(value).includes(query))
+    );
+    box.replaceChildren();
+    if (!records.length) {
+      box.innerHTML = '<p class="hist-empty">Nenhum orçamento encontrado.</p>';
+      return;
+    }
+    for (const record of records) {
+      const form = record.formulario || legacyForm(record);
+      const card = document.createElement("article");
+      card.className = "hist-card";
+      card.innerHTML = '<div class="hist-top"><strong class="hist-title"></strong><strong class="hist-total"></strong></div>' +
+        '<p class="hist-meta"></p><label class="hist-cat">Status<select></select></label>' +
+        '<div class="hist-actions"><button data-a="ver">Ver texto</button><button data-a="editar">Editar orçamento</button>' +
+        '<button data-a="duplicar">Duplicar</button><button data-a="transferir">Copiar para o Pedido em Dia</button>' +
+        '<button data-a="copiar">Copiar texto</button><button data-a="whats">Abrir WhatsApp</button>' +
+        '<button class="danger" data-a="excluir">Excluir</button></div><p class="hist-text"></p>';
+      card.querySelector(".hist-title").textContent = record.cliente || "Cliente sem nome";
+      card.querySelector(".hist-total").textContent = record.totalTxt || "";
+      card.querySelector(".hist-meta").textContent = [
+        record.tema, record.clienteWpp, dataBR(record.criadoEm),
+        form.validade ? "Válido até " + form.validade.split("-").reverse().join("/") : ""
+      ].filter(Boolean).join(" · ");
+      const select = card.querySelector("select");
+      for (const status of statuses) select.add(new Option(status, status));
+      select.value = budgetStatus(record);
+      select.onchange = () => updateStatus(record.id, select.value);
+      const preview = card.querySelector(".hist-text");
+      preview.textContent = cleanPix(record.texto);
+      const action = (name, handler) => card.querySelector('[data-a="' + name + '"]').onclick = handler;
+      action("ver", () => preview.style.display = preview.style.display === "block" ? "none" : "block");
+      action("editar", () => openBudgetForm(form, record.id));
+      action("duplicar", () => openBudgetForm(form, null));
+      action("transferir", () => transfer(record));
+      action("copiar", async () => {
+        try {
+          await navigator.clipboard.writeText(preview.textContent);
+          alert("Orçamento copiado.");
+        } catch {
+          preview.style.display = "block";
+        }
+      });
+      action("whats", () => OrcamentoWhatsApp.open(preview.textContent, record.clienteWpp));
+      action("excluir", () => {
+        if (!confirm("Excluir este orçamento do histórico?")) return;
+        try {
+          save(K.orcamentos, readHistory().filter(entry => entry.id !== record.id));
+          renderHistory();
+        } catch {
+          alert("Não foi possível excluir o orçamento.");
+        }
+      });
+      box.append(card);
+    }
+  }
   function clearHistory(){if(!confirm("Apagar todos os orçamentos salvos? Faça backup antes se quiser guardar."))return;localStorage.removeItem(K.orcamentos);renderHistory();alert("Histórico apagado.");}
 
-  function cleanPdfText(t){return cleanPix(t).replace(/[💌👤🎉📅🚚📦🧾💰💳📌💵💸📝✨🎀]/g,"").replace(/⚠️|⚠/g,"Atenção:").replace(/•/g,"-").replace(/[—–]/g,"-").replace(/[─]+/g,"------------------------------").replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,"").replace(/[*_`]/g,"").replace(/\n{3,}/g,"\n\n").trim();}
-  async function makePdf(){const jsPDF=window.jspdf?.jsPDF;if(!jsPDF)return null;const doc=new jsPDF({unit:"mm",format:"a4"}),d=json(K.dados,{}),logo=localStorage.getItem(K.logo)||"",text=cleanPdfText($("previaTexto")?.textContent||"");let y=20;if(logo){try{doc.addImage(logo,"PNG",14,12,24,24);}catch{}}doc.setFont("helvetica","bold");doc.setFontSize(17);doc.setTextColor(140,123,255);doc.text(d.atelie||"Orçamento Express",logo?44:14,24);doc.setDrawColor(255,123,172);doc.line(14,40,196,40);y=50;doc.setTextColor(55,55,55);doc.setFontSize(11);doc.splitTextToSize(text,180).forEach(line=>{if(y>280){doc.addPage();y=18;}doc.text(line,14,y);y+=6;});return doc.output("blob");}
-  async function downloadPdf(){const blob=await makePdf();if(!blob){alert("Não foi possível gerar o PDF neste navegador.");return;}const name=String($("fCliente")?.value||"orcamento").toLowerCase().replace(/[^a-z0-9]+/gi,"-").replace(/(^-|-$)/g,"")||"orcamento",url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`${name}.pdf`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);saveBudget("PDF baixado");}
-  async function sharePdf(){const blob=await makePdf();if(!blob){alert("Não foi possível gerar o PDF neste navegador.");return;}const file=new File([blob],"orcamento.pdf",{type:"application/pdf"});if(navigator.canShare?.({files:[file]})){await navigator.share({files:[file],title:"Orçamento",text:"Segue o orçamento em PDF."});saveBudget("PDF compartilhado");}else alert("Este aparelho não permite compartilhar PDF direto. Use o botão Baixar PDF com logo.");}
-  function intercept(){$("btnPdf")?.addEventListener("click",e=>{e.preventDefault();e.stopImmediatePropagation();downloadPdf();},true);$("btnSharePdf")?.addEventListener("click",e=>{e.preventDefault();e.stopImmediatePropagation();sharePdf();},true);$("btnWpp")?.addEventListener("click",e=>{const text=cleanPix(($("previaTexto")?.textContent||"").trim());if(!text)return;e.preventDefault();e.stopImmediatePropagation();const pvEl=$("previaTexto");if(pvEl)pvEl.textContent=text;saveBudget("Enviado pelo WhatsApp");const w=String(json(K.dados,{}).wpp||"").replace(/\D/g,"");window.open(`https://wa.me/${w}?text=${encodeURIComponent(text)}`,"_blank");},true);}
-  function hooks(){$("btnGerar")?.addEventListener("click",()=>setTimeout(()=>{const pvEl=$("previaTexto");if(pvEl)pvEl.textContent=cleanPix(pvEl.textContent);saveBudget("Gerado");localStorage.setItem(K.aba,"previa");},450));$("btnSalvarProduto")?.addEventListener("click",()=>setTimeout(()=>{const oldList=$("prodList");if(oldList)oldList.style.display="none";renderProducts();renderProductSelect(true);},200));}
-  function init(){style();ensureProductsTab();ensureHistoryTab();ensurePicker();ensurePix();ensureBackup();hooks();intercept();renderHistory();checkBackup();resetPicker();setupTabMemory();}
+  function hooks() {
+    $("btnSalvarProduto")?.addEventListener("click", renderProducts);
+    $("btnBackupSalvo").onclick = downloadBackup;
+    $("btnTransferir").onclick = () => { if (ultimoOrcamento?.registro) transfer(ultimoOrcamento.registro); };
+  }
+  window.OrcamentoHistorico = { writeBudget, renderHistory };
+  function init(){style();ensureProductsTab();ensureHistoryTab();ensurePix();ensureBackup();hooks();renderHistory();checkBackup();setupTabMemory();}
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
